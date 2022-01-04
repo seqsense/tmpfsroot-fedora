@@ -1,0 +1,12 @@
+[Unit]
+Description=remount /persist as rw if not provisioned yet
+After=persist.mount
+Before=sshd-keygen@rsa.service sshd-keygen@ecdsa.service sshd-keygen@ed25519.service
+ConditionPathExists=/persist/PROVISIONING
+
+[Service]
+ExecStart=/bin/mount /persist -o rw,remount
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

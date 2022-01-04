@@ -1,0 +1,277 @@
+#!/bin/bash
+
+color_red='\e[1;31;49m'
+color_green='\e[1;32;49m'
+color_gray='\e[7m'
+color_end='\e[m'
+target_filesystem=(/opt /var/cache /var/lib/docker)
+
+function mount_filesystem()
+{
+  local _file_system=$1
+  local _tmp_mount_point=$2
+  local _top_level_subvolume=$3
+
+  umount ${_file_system} || umount -vl ${_file_system}
+  mkdir -p ${_tmp_mount_point}
+  mount LABEL=${_top_level_subvolume} ${_tmp_mount_point} || {
+    echo -e "Mount failed on ${_tmp_mount_point}"
+    rm -rf ${_tmp_mount_point}
+    return 1
+  }
+}
+
+function umount_filesystem()
+{
+  local _file_system=$1
+  local _tmp_mount_point=$2
+  local _top_level_subvolume=$3
+
+  umount ${_tmp_mount_point} || umount -vl ${_tmp_mount_point}
+  mkdir -p ${_file_system}
+  mount -t btrfs -o subvol=${_top_level_subvolume} LABEL=${_top_level_subvolume} ${_file_system} || {
+    echo "Mount failed on ${file_system}"
+    return 1
+  }
+}
+
+function list_snapshot()
+{
+  local _count_snapshot
+  local _top_level_subvolume=$1
+  local _file_system=$2
+  local _tmp_mount_point=/mnt/btrfs_$1
+
+  mount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || {
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume}
+    return 1
+  }
+  ls ${_tmp_mount_point} | awk --assign subvol_top="${_top_level_subvolume}" '! match($0, "^"subvol_top"$")'
+  _count_snapshot=$(ls ${_tmp_mount_point} | awk --assign subvol_top="${_top_level_subvolume}" '! match($0, "^"subvol_top"$")' | wc -l)
+  if [ ${_count_snapshot} -eq 0 ]; then
+    echo "No snapshot!"
+  fi
+  umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+}
+
+function take_snapshot()
+{
+  local _top_level_subvolume=$1
+  local _file_system=$2
+  local _tmp_mount_point=/mnt/btrfs_$1
+  local _date=$(date "+%m-%d-%y_%H%M%S")
+
+  mount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || {
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume}
+    return 1
+  }
+  sleep 1
+  btrfs subvolume snapshot -r ${_tmp_mount_point}/${_top_level_subvolume} ${_tmp_mount_point}/${_top_level_subvolume}.snapshot_${_date} || {
+    echo "Faild to take snapshot"
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume}
+    return 1
+  }
+  umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+}
+
+function select_snapshot()
+{
+  local _key _key_prefix _key_suffix _snapshot _read_snapshot _line _arg _count_snapshot _current_rollback_snapshot
+  local _top_level_subvolume=$1
+  local _file_system=$2
+  local _tmp_mount_point=/mnt/btrfs_$1
+
+  mount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || {
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume}
+    return 1
+  }
+  _count_snapshot=0
+  while read _line
+  do
+    _snapshot[$_count_snapshot]="${_line}"
+    ((_count_snapshot++))
+  done < <(ls ${_tmp_mount_point} | awk --assign subvol_top="${_top_level_subvolume}" 'match($0, "^"subvol_top".")')
+  if [ ${_count_snapshot} -eq 0 ];then
+    echo -e "${color_red}No snapshot. Take snapshot to rollback before select\nReturn menu${color_end}"
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+    return 1
+  fi
+
+  _count_snapshot=0
+  while read _line
+  do
+    _current_rollback_snapshot[$_count_snapshot]="${_line}"
+    ((_count_snapshot++))
+  done < <(ls ${_tmp_mount_point} | awk 'match($0, /^@/)')
+  if [ ${_count_snapshot} -eq 0 ];then
+    echo -e "No current snapshot to rollback"
+  elif [ ${_count_snapshot} -eq 1 ];then
+    echo -e "Current snapshot to rollback is '${_current_rollback_snapshot}'"
+    mv ${_tmp_mount_point}/${_current_rollback_snapshot} ${_tmp_mount_point}/${_current_rollback_snapshot#\@} || {
+      echo "Failed to load current snapshot"
+      umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+      return 1
+    }
+  elif [ ${_count_snapshot} -ge 2 ];then
+    ls ${_tmp_mount_point} | awk 'match($0, /^@/)'
+    echo -e "${color_red}Current snapshot is not one.\nAn error has occuerred.\nReturn menu${color_end}"
+    umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+    return 1
+  fi
+
+  echo -e "[Select snapshot] cursor keys(up,down)\n[Return menu] 0\n"
+  local _cursor=0
+  while :
+  do
+    for _read_snapshot in "${_snapshot[@]}"
+    do
+      if [ "${_snapshot[$_cursor]}" == "$_read_snapshot" ]; then
+        echo -e " ${color_gray}$_read_snapshot${color_end}"
+      else
+        echo -e " $_read_snapshot"
+      fi
+    done
+
+    read -sN1 _key
+    if [ "${_key}" == $'\n' ]; then break; fi
+
+    read -sN1 -t 0.001 _key_prefix
+    read -sN1 -t 0.001 _key_suffix
+
+    _key+=${_key_prefix}${_key_suffix}
+    case ${_key} in
+      $'\e[A') ((_cursor > 0)) && ((_cursor--))
+               ;;
+      $'\e[B') ((_cursor < ${#_snapshot[@]}-1)) && ((_cursor++))
+               ;;
+      0) clear
+         echo -e "Return main menu....\nUndo currenct snapshot to rollback"
+         mv ${_tmp_mount_point}/${_current_rollback_snapshot#\@} ${_tmp_mount_point}/${_current_rollback_snapshot} || {
+           echo "Faild to undo loading of current snapshot"
+           umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+           return 1
+         }
+         sleep 3
+         break
+         ;;
+    esac
+    printf " \e[${#_snapshot[@]}A\e[m"
+  done
+
+  if [ ! "${_key}" == 0 ]; then
+    clear
+    echo -e "Selected snapshot ${_snapshot[$_cursor]}"
+    mv ${_tmp_mount_point}/${_snapshot[$_cursor]} ${_tmp_mount_point}/\@${_snapshot[$_cursor]}
+    if [ $? -eq 0 ]; then
+      echo -e "'${_current_rollback_snapshot#\@}' => '${_snapshot[$_cursor]}'"
+      echo -e "${color_green}Success to select snapshot${color_end}"
+    else
+      echo -e "${color_red}Faild select snapshot to rollback${color_end}"
+      umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+      return 1
+    fi
+  fi
+  umount_filesystem ${_file_system} ${_tmp_mount_point} ${_top_level_subvolume} || return 1
+}
+
+function menu_fs_list()
+{
+  echo -e "\n[L] Show snapshot list\n[T] Take snapshot list\n[S] Select snapshot to boot\n[0] back main menu"
+}
+
+function menu_select_fs_list()
+{
+  echo -e "\n[O] /opt\n[C] /var/cache\n[D] /var/lib/docker\n[Q] Quit"
+}
+
+function menu_fs()
+{
+  echo -e "-----------------------------------------\n'$1' filesystem Manage\n-----------------------------------------"
+  menu_fs_list
+  while :
+  do
+    local _key
+    local _top_level_subvolume=$1
+    local _file_system=$2
+    read -p "> " _key
+    case ${_key} in
+      L) clear
+         echo -e "---------------------------------------\nShow snapshot list\n---------------------------------------"
+         list_snapshot ${_top_level_subvolume} ${_file_system} || echo -e "${color_red}Can not read snapshot!${color_end}"
+         menu_fs_list
+         ;;
+      T) clear
+         echo -e "---------------------------------------\nTake snapshot\n---------------------------------------"
+         take_snapshot ${_top_level_subvolume} ${_file_system} || echo -e "${color_red}Can not take snapshot!${color_end}"
+         menu_fs_list
+         ;;
+      S) clear
+         echo -e "---------------------------------------\nSelect snapshot to rollback\n---------------------------------------"
+         select_snapshot ${_top_level_subvolume} ${_file_system} || echo -e "${color_red}Can not select snapshot!${color_end}"
+         menu_fs_list
+         ;;
+      0) echo "Back main menu"
+         menu_main
+         ;;
+      *) echo -e "${color_red}Unrecognized input${color_end}"
+         menu_fs_list
+         ;;
+    esac
+  done
+}
+
+function menu_main()
+{
+  clear
+  echo -e "---------------------------------------\nUtility for manage filesystem snapshot\n---------------------------------------"
+  menu_select_fs_list
+  while :
+  do
+    local _key
+    read -p "> " _key
+    case ${_key} in
+      O) clear
+         menu_fs opt /opt
+         ;;
+      C) clear
+         menu_fs var_cache /var/cache
+         ;;
+      D) clear
+         menu_fs var_lib_docker /var/lib/docker
+         ;;
+      Q) echo "Quit"
+         systemctl start docker.service || exit 1
+         exit 0
+         ;;
+      *) echo -e "${color_red}Unrecognized input${color_end}"
+         menu_select_fs_list
+         ;;
+    esac
+  done
+}
+
+if [ "$EUID" -ne 0 ]; then
+  echo -e "${color_red}Operation is not permitted${color_end}"
+  exit 1
+fi
+
+for filesystem in "${target_filesystem[@]}"
+do
+  cat /etc/fstab | grep "${filesystem}" > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "${filesystem} filesystem does not exist"
+    exit 1
+  fi
+  mount -l -t btrfs | grep "${filesystem}" > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo -e "${filesystem} filesystem is not mounted\n${color_red}Required file system is not mounted${color_end}"
+    exit 1
+  fi
+  echo -e "${filesystem} is mounted"
+done
+
+trap '' SIGINT SIGQUIT SIGTSTP
+
+echo "Wait for stop docker....."
+systemctl stop docker.service || exit 1
+menu_main

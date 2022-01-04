@@ -1,0 +1,11 @@
+[Unit]
+Description=Save grub rootfs entry
+After=sq-edge-host-agent.service
+
+[Service]
+ExecStartPre=/bin/sleep 60
+ExecStart=/usr/bin/save-grub-rootfs.sh
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
