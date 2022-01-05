@@ -64,6 +64,8 @@ COPY entrypoint.sh /
 VOLUME \
   /output \
   /work/root.override \
+  /work/iso-root.override \
+  /work/downloads \
   /work/ks
 
 ENTRYPOINT ["/entrypoint.sh"]
