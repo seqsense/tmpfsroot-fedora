@@ -94,7 +94,7 @@ done
 
 # Generate iso
 mkisofs \
-  -o /output/fedora-custom.iso \
+  -o /work/output/fedora-custom.iso \
   -b isolinux/isolinux.bin \
   -c isolinux/boot.cat \
   -no-emul-boot \

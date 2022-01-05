@@ -62,7 +62,7 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc \
 COPY entrypoint.sh /
 
 VOLUME \
-  /output \
+  /work/output \
   /work/root.override \
   /work/iso-root.override \
   /work/hooks.d \
