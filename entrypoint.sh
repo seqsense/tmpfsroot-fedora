@@ -109,3 +109,5 @@ mkisofs \
   -V "${VOLUME_LABEL}" \
   -R -J -v \
   iso-root/
+
+chmod a+w /work/output/fedora-custom.iso
