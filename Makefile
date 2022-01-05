@@ -14,8 +14,8 @@ UPDATER_IMAGE := tmprootfs-fedora-updater:$(FEDORA_MAJOR)
 
 export DOCKER_BUILDKIT = 1
 
-.PHONY: docker-build
-docker-build:
+.PHONY: builder
+builder:
 	docker build \
 		--secret id=netrc,src=$(HOME)/.netrc \
 		--build-arg FEDORA_VERSION=$(FEDORA_VERSION) \
@@ -24,8 +24,8 @@ docker-build:
 		-t $(BUILDER_IMAGE) \
 		.
 
-.PHONY: updater-build
-updater-build:
+.PHONY: updater
+updater:
 	docker build \
 		-f updater.Dockerfile \
 		--build-arg FEDORA_MAJOR=$(FEDORA_MAJOR) \
