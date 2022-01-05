@@ -85,6 +85,13 @@ sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml > comps.xml
 createrepo -g comps.xml iso-root/
 
 
+# Custom scripts
+for script in build-hooks.d/*.sh
+do
+  ${script}
+done
+
+
 # Generate iso
 mkisofs \
   -o /output/fedora-custom.iso \

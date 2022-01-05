@@ -66,6 +66,7 @@ VOLUME \
   /work/root.override \
   /work/iso-root.override \
   /work/hooks.d \
+  /work/build-hooks.d \
   /work/downloads \
   /work/ks
 
