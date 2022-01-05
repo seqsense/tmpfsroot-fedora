@@ -17,12 +17,13 @@ fi
 
 if [ -z ${DISK_DEVS} ] || \
   [ -z ${MAIN_DISK} ] || \
+  [ -z ${PARTSIZE_DOCKER} ] || \
   [ -z ${PARTSIZE_LOG} ] || \
   [ -z ${PARTSIZE_CACHE} ] || \
   [ -z ${PARTSIZE_OPT} ]
 then
   echo "Required variables not set" >&2
-  echo "required: DISK_DEVS, MAIN_DISK, PARTSIZE_LOG, PARTSIZE_CACHE, PARTSIZE_OPT" >&2
+  echo "required: DISK_DEVS, MAIN_DISK, PARTSIZE_DOCKER, PARTSIZE_LOG, PARTSIZE_CACHE, PARTSIZE_OPT" >&2
   exit 1
 fi
 
@@ -74,6 +75,7 @@ tar czf iso-root/custom-files.tar.gz root hooks.d
 # Generate kickstart config
 sed "s/@@DISK_DEVS@@/${DISK_DEVS}/g
     s/@@MAIN_DISK@@/${MAIN_DISK}/g
+    s/@@PARTSIZE_DOCKER@@/${PARTSIZE_DOCKER}/g
     s/@@PARTSIZE_LOG@@/${PARTSIZE_LOG}/g
     s/@@PARTSIZE_CACHE@@/${PARTSIZE_CACHE}/g
     s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g" ks.tpl.cfg > iso-root/ks.cfg
