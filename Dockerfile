@@ -24,12 +24,14 @@ RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
 
 ARG FEDORA_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
 ARG FEDORA_VERSION
+ARG FEDORA_MAJOR
 ENV FEDORA_VERSION=${FEDORA_VERSION} \
-  FEDORA_MIRROR=${FEDORA_MIRROR}
+  FEDORA_MIRROR=${FEDORA_MIRROR} \
+  FEDORA_MAJOR=${FEDORA_MAJOR}
 RUN curl --fail -L --remote-name \
-    ${FEDORA_MIRROR}/releases/${FEDORA_VERSION%-*}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
   && curl --fail -L --remote-name \
-    ${FEDORA_MIRROR}/releases/${FEDORA_VERSION%-*}/Server/x86_64/iso/Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
+    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
   && gpg --verify *-CHECKSUM \
   && sha256sum --ignore-missing -c *-CHECKSUM \
   && echo "VOLUME_LABEL=$(isoinfo -d -i fedora.iso | sed -n 's/Volume id: //p;s/ /\\x20/g')" >> env.conf \
