@@ -21,3 +21,6 @@ ENV FEDORA_MAJOR=${FEDORA_MAJOR} \
 
 VOLUME /work
 WORKDIR /work
+
+COPY updater.sh /
+CMD ["/updater.sh"]

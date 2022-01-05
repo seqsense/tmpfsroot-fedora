@@ -32,7 +32,8 @@ dnf_repos="
 	--repofrompath updates-tmp,${FEDORA_MIRROR}/updates/${FEDORA_MAJOR}/Everything/x86_64
 	--repo releases-tmp
 	--repo updates-tmp
-	--repo docker-ce-stable"
+	--repo docker-ce-stable
+"
 
 
 # Download rpms
