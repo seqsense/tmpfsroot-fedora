@@ -30,14 +30,15 @@ ENV FEDORA_VERSION=${FEDORA_VERSION} \
   FEDORA_MAJOR=${FEDORA_MAJOR}
 RUN curl --fail -L --remote-name \
     ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+  && isofile=Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
   && curl --fail -L --remote-name \
-    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
+    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
   && gpg --verify *-CHECKSUM \
   && sha256sum --ignore-missing -c *-CHECKSUM \
-  && echo "VOLUME_LABEL=$(isoinfo -d -i fedora.iso | sed -n 's/Volume id: //p;s/ /\\x20/g')" >> env.conf \
+  && echo "VOLUME_LABEL=$(isoinfo -d -i ${isofile} | sed -n 's/Volume id: //p;s/ /\\x20/g')" >> env.conf \
   && mkdir ./iso-root \
-  && bsdtar -xf Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso -C ./iso-root \
-  && rm Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso
+  && bsdtar -xf ${isofile} -C ./iso-root \
+  && rm ${isofile}
 
 RUN . ./env.conf \
   && echo -e "label kickstart\n\
