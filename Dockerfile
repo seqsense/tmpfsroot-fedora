@@ -22,7 +22,7 @@ WORKDIR /work
 
 RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
 
-ARG FEDORA_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
+ARG FEDORA_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
 ARG FEDORA_VERSION
 ARG FEDORA_MAJOR
 ENV FEDORA_VERSION=${FEDORA_VERSION} \
