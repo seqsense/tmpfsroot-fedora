@@ -66,6 +66,7 @@ sed -i "s/^set timeout=.*$/set timeout=10/" iso-root/EFI/BOOT/grub.cfg
 
 
 # Create custom install files tarball
+cp -ar root.override/* root/
 tar czf iso-root/custom-files.tar.gz root
 
 
@@ -75,6 +76,7 @@ sed "s/@@DISK_DEVS@@/${DISK_DEVS}/g
     s/@@PARTSIZE_LOG@@/${PARTSIZE_LOG}/g
     s/@@PARTSIZE_CACHE@@/${PARTSIZE_CACHE}/g
     s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g" ks.tpl.cfg > iso-root/ks.cfg
+cp ks/ks.*.cfg iso-root
 
 
 # Create manifest

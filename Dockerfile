@@ -61,6 +61,9 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc \
 
 COPY entrypoint.sh /
 
-VOLUME /output
+VOLUME \
+  /output \
+  /work/root.override \
+  /work/ks
 
 ENTRYPOINT ["/entrypoint.sh"]
