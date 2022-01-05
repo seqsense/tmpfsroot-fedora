@@ -1,0 +1,52 @@
+name: ci
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select mirror
+        run: |
+          for urls in \
+            https://mirror.genesisadaptive.com/fedora/linux \
+            http://mirror.math.princeton.edu/pub/fedora/linux
+          do
+            http_url=$(echo ${urls} | cut -d" " -f1)
+            echo "Trying ${http_url}"
+            if (curl --fail -L --connect-timeout 5 ${http_url} > /dev/null 2> /dev/null)
+            then
+              echo "FEDORA_MIRROR=${http_url}" >> ${GITHUB_ENV}
+              exit 0
+            fi
+          done
+          echo "No mirror is available"
+          false
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get Fedora version
+        run: echo "FEDORA_MAJOR=$(make show-fedora-major)" >> ${GITHUB_ENV}
+
+      - name: Build builder image
+        run: make builder FEDORA_MIRROR=${FEDORA_MIRROR}
+      - name: Build updater image
+        run: make updater FEDORA_MIRROR=${FEDORA_MIRROR}
+
+      - name: Upload to GitHub Container registry
+        if: github.event_name == 'push'
+        run: |
+          docker tag \
+            tmprootfs-fedora-builder:${FEDORA_MAJOR} \
+            ghcr.io/seqsense/tmprootfs-fedora-builder:${FEDORA_MAJOR}
+          docker tag \
+            tmprootfs-fedora-updater:${FEDORA_MAJOR} \
+            ghcr.io/seqsense/tmprootfs-fedora-updater:${FEDORA_MAJOR}
+          docker push ghcr.io/seqsense/tmprootfs-fedora-builder:${FEDORA_MAJOR}
+          docker push ghcr.io/seqsense/tmprootfs-fedora-updater:${FEDORA_MAJOR}

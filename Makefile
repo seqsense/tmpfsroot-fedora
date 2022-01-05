@@ -32,3 +32,7 @@ updater:
 		--build-arg FEDORA_MIRROR=$(FEDORA_MIRROR) \
 		-t $(UPDATER_IMAGE) \
 		.
+
+.PHONY: show-fedora-major
+show-fedora-major:
+	@echo $(FEDORA_MAJOR)
