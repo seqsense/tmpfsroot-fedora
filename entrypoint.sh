@@ -2,7 +2,7 @@
 
 set -eu
 
-. env.conf
+. ./env.conf
 
 
 if [ ! -f rpms.lock ]
