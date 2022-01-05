@@ -67,7 +67,7 @@ sed -i "s/^set timeout=.*$/set timeout=10/" iso-root/EFI/BOOT/grub.cfg
 
 # Create custom install files tarball
 cp -ar root.override/* root/
-tar czf iso-root/custom-files.tar.gz root
+tar czf iso-root/custom-files.tar.gz root hooks.d
 
 
 # Generate kickstart config

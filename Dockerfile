@@ -65,6 +65,7 @@ VOLUME \
   /output \
   /work/root.override \
   /work/iso-root.override \
+  /work/hooks.d \
   /work/downloads \
   /work/ks
 
