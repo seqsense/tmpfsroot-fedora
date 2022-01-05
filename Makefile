@@ -17,7 +17,6 @@ export DOCKER_BUILDKIT = 1
 .PHONY: builder
 builder:
 	docker build \
-		--secret id=netrc,src=$(HOME)/.netrc \
 		--build-arg FEDORA_VERSION=$(FEDORA_VERSION) \
 		--build-arg FEDORA_MAJOR=$(FEDORA_MAJOR) \
 		--build-arg FEDORA_MIRROR=$(FEDORA_MIRROR) \
