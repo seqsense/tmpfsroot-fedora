@@ -81,7 +81,7 @@ cp ks/ks.*.cfg iso-root
 
 # Create manifest
 cat packages.list | xargs -n1 -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" > packagereqs.xml
-sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml > comps.xml
+sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml > iso-root/comps.xml
 createrepo -g comps.xml iso-root/
 
 
