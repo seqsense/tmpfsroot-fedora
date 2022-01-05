@@ -12,5 +12,5 @@ docker-build:
 		--secret id=netrc,src=$(HOME)/.netrc \
 		--build-arg FEDORA_VERSION=$(FEDORA_VERSION) \
 		--build-arg FEDORA_MAJOR=$(FEDORA_MAJOR) \
-		-t $(NAME) \
+		-t $(NAME):$(FEDORA_MAJOR) \
 		.
