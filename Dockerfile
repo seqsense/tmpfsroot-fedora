@@ -54,14 +54,6 @@ RUN . ./env.conf \
 COPY iso-root ./iso-root
 COPY root ./root
 COPY ks.tpl.cfg comps.tpl.xml ./
-
-ARG TMPFSROOT_VERSION=v0.0.2
-RUN --mount=type=secret,id=netrc,target=/root/.netrc \
-  git clone --depth=1 -b ${TMPFSROOT_VERSION} https://github.com/seqsense/tmpfsroot /tmp/tmpfsroot \
-  && pwd; ls -l ./ \
-  && mv /tmp/tmpfsroot/96tmpfsroot ./root/lib/dracut/modules.d/ \
-  && rm -rf /tmp/tmpfsroot
-
 COPY entrypoint.sh /
 
 VOLUME \
