@@ -1,6 +1,24 @@
 # tmpfsroot-fedora
 
-Build power-failure-safe linux image
+Build power-failure-safe linux image based on Fedora for IoT systems
+
+## Basics
+
+### How to protect filesystems from power failure
+
+Write operations during power failure may cause filesystem inconsistency.
+On tmpfsroot-fedora,
+
+- copy rootfs contents to tmpfs during boot and unmount original rootfs
+- mount persistent data pertitions readonly
+- wipe and format broken filesystem during boot (for `/var/log`)
+
+to keep the system at least bootable and connected to the network.
+
+### Why based on Fedora
+
+- **Initrd maintainance tools**: custom initrd to achieve rootfs-on-tmpfs and filesystem fault handling should be maintained accross base OS upgrades. `dracut` make it easy and sustainable.
+- **Fully with systemd**: we need `init` process to be `systemd` to maintain service dependencies with many hardware devices (from initrd).
 
 ## Partition structure
 
