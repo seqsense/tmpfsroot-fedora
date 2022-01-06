@@ -10,7 +10,7 @@ Write operations during power failure may cause filesystem inconsistency.
 On tmpfsroot-fedora,
 
 - copy rootfs contents to tmpfs during boot and unmount original rootfs
-- mount persistent data pertitions readonly
+- mount persistent data partitions readonly
 - wipe and format broken filesystem during boot (for `/var/log`)
 
 to keep the system at least bootable and connected to the network.
