@@ -1,8 +1,8 @@
 #!/bin/bash
 
 repos="
-  --repofrompath releases-tmp,$(FEDORA_MIRROR)/releases/$(FEDORA_MAJOR)/Everything/x86_64/os
-  --repofrompath updates-tmp,$(FEDORA_MIRROR)/updates/$(FEDORA_MAJOR)/Everything/x86_64
+  --repofrompath releases-tmp,${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Everything/x86_64/os
+  --repofrompath updates-tmp,${FEDORA_MIRROR}/updates/${FEDORA_MAJOR}/Everything/x86_64
   --repo releases-tmp
   --repo updates-tmp
   --repo docker-ce-stable
@@ -23,4 +23,4 @@ repos="
   | sort \
   | uniq \
   | sed '/langpack-/{/langpack-en/!d};/all-langpacks/d' \
-  | sed '/^fedora-release-/{/^fedora-release-common/!{/^fedora-release-identity-basic/!d}}' > rpms.lock
+  | sed '/^fedora-release-/{/^fedora-release-common/!{/^fedora-release-identity-basic/!d}}' | tee rpms.lock
