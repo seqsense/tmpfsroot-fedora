@@ -2,9 +2,6 @@
 
 set -eu
 
-. ./env.conf
-
-
 if [ ! -f rpms.lock ]
 then
   echo "rpms.lock not found"
@@ -60,13 +57,6 @@ do
 done < rpms.lock
 
 
-# Update grub configs
-sed -i '/menu default/d' iso-root/isolinux/isolinux.cfg
-sed -i '/label linux/e cat boot-label.cfg' iso-root/isolinux/isolinux.cfg
-sed -i "/menuentry 'Test this media /e cat efiboot-label.cfg" iso-root/EFI/BOOT/grub.cfg
-sed -i "s/^set timeout=.*$/set timeout=10/" iso-root/EFI/BOOT/grub.cfg
-
-
 # Create custom install files tarball
 cp -ar root.override/* root/
 tar czf iso-root/custom-files.tar.gz root hooks.d
@@ -106,10 +96,8 @@ mkisofs \
   -eltorito-alt-boot \
   -e images/efiboot.img \
   -no-emul-boot \
-  -m TRANS.TBL \
-  -m .dnf \
   -graft-points \
-  -V "${VOLUME_LABEL}" \
+  -V tmpfsroot-fedora \
   -R -J -v \
   iso-root/
 

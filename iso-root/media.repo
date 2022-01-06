@@ -1,5 +1,5 @@
 [InstallMedia]
-name=Fedora 33
+name=Tmpfsroot Fedora
 metadata_expire=-1
 baseurl=cdrom
 enabled=1

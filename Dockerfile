@@ -35,21 +35,9 @@ RUN curl --fail -L --remote-name \
     ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
   && gpg --verify *-CHECKSUM \
   && sha256sum --ignore-missing -c *-CHECKSUM \
-  && echo "VOLUME_LABEL=$(isoinfo -d -i ${isofile} | sed -n 's/Volume id: //p;s/ /\\x20/g')" >> env.conf \
   && mkdir ./iso-root \
   && bsdtar -xf ${isofile} -C ./iso-root \
   && rm ${isofile}
-
-RUN . ./env.conf \
-  && echo -e "label kickstart\n\
-    menu label ^Install customized fedora with tmpfsroot\n\
-    menu default\n\
-    kernel vmlinuz\n\
-    append initrd=initrd.img inst.stage2=hd:LABEL=${VOLUME_LABEL} inst.ks=cdrom:/ks.cfg nouveau.modeset=0" > boot-label.cfg \
-  && echo -e "menuentry 'Install customized fedora with tmpfsroot' --class fedora --class gnu-linux --class gnu --class os {\n\
-    linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL=${VOLUME_LABEL} inst.ks=cdrom:/ks.cfg\n\
-    initrdefi /images/pxeboot/initrd.img \n\
-  }" > efiboot-label.cfg
 
 COPY iso-root ./iso-root
 COPY root ./root
