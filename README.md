@@ -9,6 +9,7 @@ Mount point     | Size                 | Filesystem | Usage
 /boot/efi       |                 200M | fat32      | EFI
 / (A)           |                   2G | ext4       | Readonly rootfs (main/fallback)
 / (B)           |                   2G | ext4       | Readonly rootfs (main/fallback)
+/persist        |                 200M | ext4       | Readonly persistent data
 /var/log        |    `${PARTSIZE_LOG}` | ext4       | Logs (automatically refreshed on failure)
 /opt            |    `${PARTSIZE_OPT}` | btrfs      | User applications
 /var/cache      |  `${PARTSIZE_CACHE}` | btrfs      | User cache
