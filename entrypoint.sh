@@ -61,15 +61,38 @@ done < rpms.lock
 cp -ar root.override/* root/
 tar czf iso-root/custom-files.tar.gz root hooks.d
 
-
 # Generate kickstart config
-sed "s/@@DISK_DEVS@@/${DISK_DEVS}/g
+mkdir -p ks2
+cp ks/ks.*.cfg ks2/
+(cd ks2 && touch ks.post.cfg ks.post-nochroot.cfg ks.pre.cfg ks.pre-install.cfg ks.root.cfg)
+sed "
+    s/@@DISK_DEVS@@/${DISK_DEVS}/g
     s/@@MAIN_DISK@@/${MAIN_DISK}/g
     s/@@PARTSIZE_DOCKER@@/${PARTSIZE_DOCKER}/g
     s/@@PARTSIZE_LOG@@/${PARTSIZE_LOG}/g
     s/@@PARTSIZE_CACHE@@/${PARTSIZE_CACHE}/g
-    s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g" ks.tpl.cfg > iso-root/ks.cfg
-cp ks/ks.*.cfg iso-root
+    s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g
+    /@@KS\.POST\.CFG@@/{
+      d
+      e cat ks2/ks.post.cfg
+    }
+    /@@KS\.POST-NOCHROOT\.CFG@@/{
+      d
+      e cat ks2/ks.post-nochroot.cfg
+    }
+    /@@KS\.PRE\.CFG@@/{
+      d
+      e cat ks2/ks.pre.cfg
+    }
+    /@@KS\.PRE-INSTALL\.CFG@@/{
+      d
+      e cat ks2/ks.pre-install.cfg
+    }
+    /@@KS\.ROOT\.CFG@@/{
+      d
+      e cat ks2/ks.root.cfg
+    }
+  " ks.tpl.cfg > iso-root/ks.cfg
 
 
 # Create manifest
