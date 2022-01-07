@@ -73,23 +73,28 @@ sed "
     s/@@PARTSIZE_CACHE@@/${PARTSIZE_CACHE}/g
     s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g
     /@@KS\.POST\.CFG@@/{
-      d
+      s/^/# /
+      n
       e cat ks2/ks.post.cfg
     }
     /@@KS\.POST-NOCHROOT\.CFG@@/{
-      d
+      s/^/# /
+      n
       e cat ks2/ks.post-nochroot.cfg
     }
     /@@KS\.PRE\.CFG@@/{
-      d
+      s/^/# /
+      n
       e cat ks2/ks.pre.cfg
     }
     /@@KS\.PRE-INSTALL\.CFG@@/{
-      d
+      s/^/# /
+      n
       e cat ks2/ks.pre-install.cfg
     }
     /@@KS\.ROOT\.CFG@@/{
-      d
+      s/^/# /
+      n
       e cat ks2/ks.root.cfg
     }
   " ks.tpl.cfg > iso-root/ks.cfg
