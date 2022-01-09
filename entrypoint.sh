@@ -38,6 +38,7 @@ dnf_repos="
 mkdir -p downloads
 cat rpms.lock | xargs -n256 dnf download \
   ${dnf_repos} \
+  --arch=x86_64 --arch=noarch \
   --downloaddir=downloads
 while read package
 do
