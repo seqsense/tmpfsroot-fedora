@@ -9,6 +9,14 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        fedora:
+          - 33-1.2
+          - 34-1.2
+          - 35-1.2
+    env:
+      MAKE: make FEDORA_VERSION=${{ matrix.fedora }}
     runs-on: ubuntu-latest
     steps:
       - name: Select mirror
@@ -32,12 +40,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get Fedora version
-        run: echo "FEDORA_MAJOR=$(make show-fedora-major)" >> ${GITHUB_ENV}
+        run: echo "FEDORA_MAJOR=$(${MAKE} show-fedora-major)" >> ${GITHUB_ENV}
 
       - name: Build builder image
-        run: make builder FEDORA_MIRROR=${FEDORA_MIRROR}
+        run: ${MAKE} builder FEDORA_MIRROR=${FEDORA_MIRROR}
       - name: Build updater image
-        run: make updater FEDORA_MIRROR=${FEDORA_MIRROR}
+        run: ${MAKE} updater FEDORA_MIRROR=${FEDORA_MIRROR}
 
       - name: Login to GitHub Container Registry
         #if: github.event_name == 'push'
