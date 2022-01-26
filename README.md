@@ -88,14 +88,14 @@ export FEDORA_MAJOR=33
 
 Directory           | Files                  | Note
 ------------------- | ---------------------- | ----
+`ks`                | `ks.root.cfg`          | \[**Required**\] Kickstart script included to root section
+`ks`                | `ks.pre-install.cfg`   | Kickstart script included to `%pre-install` section
+`ks`                | `ks.post-nochroot.cfg` | Kickstart script included to `%post --nochroot` section
+`ks`                | `ks.post.cfg`          | Kickstart script included to `%post` section
 `build-hooks.d`     | `*.sh`                 | Executed before creating ISO
 `hooks.d`           | `*.sh`                 | Executed during installation
 `iso-root.override` | `**/*`                 | Copied to installer disk root
 `root.override`     | `**/*`                 | Copied to installed filesystem root
-`ks`                | `ks.root.cfg`          | [optional] Kickstart script included to root section
-`ks`                | `ks.pre-install.cfg`   | [optional] Kickstart script included to `%pre-install` section
-`ks`                | `ks.post-nochroot.cfg` | [optional] Kickstart script included to `%post --nochroot` section
-`ks`                | `ks.post.cfg`          | [optional] Kickstart script included to `%post` section
 
 ### Generate installer ISO
 
