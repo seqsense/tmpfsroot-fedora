@@ -21,15 +21,14 @@ jobs:
     steps:
       - name: Select mirror
         run: |
-          for urls in \
+          for url in \
             https://mirror.genesisadaptive.com/fedora/linux \
             http://mirror.math.princeton.edu/pub/fedora/linux
           do
-            http_url=$(echo ${urls} | cut -d" " -f1)
-            echo "Trying ${http_url}"
-            if (curl --fail -L --connect-timeout 5 ${http_url} > /dev/null 2> /dev/null)
+            echo "Trying ${url}"
+            if (curl --fail -L --connect-timeout 5 ${url} > /dev/null 2> /dev/null)
             then
-              echo "FEDORA_MIRROR=${http_url}" >> ${GITHUB_ENV}
+              echo "FEDORA_MIRROR=${url}" >> ${GITHUB_ENV}
               exit 0
             fi
           done
