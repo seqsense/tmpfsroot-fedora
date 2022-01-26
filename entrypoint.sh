@@ -117,6 +117,13 @@ then
 fi
 
 
+# Copy custom iso-root files
+if [ -d iso-root.override ]
+then
+  cp -r iso-root.override/* iso-root/
+fi
+
+
 # Generate iso
 mkisofs \
   -o /work/output/fedora-custom.iso \
