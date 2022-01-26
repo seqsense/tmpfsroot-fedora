@@ -59,7 +59,7 @@ done < rpms.lock
 
 
 # Create custom install files tarball
-cp -ar root.override/* root/
+cp -ar root.override/* root/ || true
 tar czf iso-root/custom-files.tar.gz root hooks.d
 
 # Generate kickstart config
@@ -108,10 +108,13 @@ createrepo -g comps.xml iso-root/
 
 
 # Custom scripts
-for script in build-hooks.d/*.sh
-do
-  ${script}
-done
+if [ -d build-hooks.d ]
+then
+  for script in build-hooks.d/*.sh
+  do
+    ${script}
+  done
+fi
 
 
 # Generate iso
