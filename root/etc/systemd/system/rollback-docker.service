@@ -1,0 +1,16 @@
+[Unit]
+Description=rollback /var/lib/docker filesystem
+Requires=var-lib-docker.mount
+After=local-fs-pre.target
+Before=local-fs.target var-lib-docker.mount
+DefaultDependencies=no
+RefuseManualStart=true
+RefuseManualStop=true
+
+[Service]
+ExecStart=/usr/bin/fs-rollback var_lib_docker /var/lib/docker
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=local-fs.target

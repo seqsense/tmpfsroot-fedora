@@ -1,0 +1,56 @@
+# syntax = docker/dockerfile:1.2
+ARG FEDORA_MAJOR
+FROM fedora:${FEDORA_MAJOR}
+
+RUN --mount=type=cache,target=/var/cache/dnf \
+  dnf install -y --repo fedora --repo updates \
+    bsdtar \
+    cpio \
+    createrepo \
+    dnf-plugins-core \
+    findutils \
+    genisoimage \
+    git \
+    make \
+    pykickstart \
+    wget \
+  && dnf clean all \
+  && dnf config-manager \
+    --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+WORKDIR /work
+
+RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
+
+ARG FEDORA_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
+ARG FEDORA_VERSION
+ARG FEDORA_MAJOR
+ENV FEDORA_VERSION=${FEDORA_VERSION} \
+  FEDORA_MIRROR=${FEDORA_MIRROR} \
+  FEDORA_MAJOR=${FEDORA_MAJOR}
+RUN curl --fail -L --remote-name \
+    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+  && isofile=Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
+  && curl --fail -L --remote-name \
+    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
+  && gpg --verify *-CHECKSUM \
+  && sha256sum --ignore-missing -c *-CHECKSUM \
+  && mkdir ./iso-root \
+  && bsdtar -xf ${isofile} -C ./iso-root \
+  && rm ${isofile}
+
+COPY iso-root ./iso-root
+COPY root ./root
+COPY ks.tpl.cfg comps.tpl.xml ./
+COPY entrypoint.sh /
+
+VOLUME \
+  /work/output \
+  /work/root.override \
+  /work/iso-root.override \
+  /work/hooks.d \
+  /work/build-hooks.d \
+  /work/downloads \
+  /work/ks
+
+ENTRYPOINT ["/entrypoint.sh"]

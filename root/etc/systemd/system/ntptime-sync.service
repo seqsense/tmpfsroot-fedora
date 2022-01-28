@@ -1,0 +1,16 @@
+[Unit]
+Description=make step sync at boot
+After=network-online.target
+Before=docker.service
+
+[Service]
+ExecStartPre=/usr/bin/ntp-sources-monitor
+ExecStart=/usr/bin/chronyc -a makestep
+ExecStartPost=/usr/bin/chronyc -a tracking
+ExecStartPost=/usr/bin/timedatectl
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=300s
+
+[Install]
+WantedBy=multi-user.target
