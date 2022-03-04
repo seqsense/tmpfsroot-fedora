@@ -23,4 +23,4 @@ repos="
   | sort \
   | uniq \
   | sed '/langpack-/{/langpack-en/!d};/all-langpacks/d' \
-  | sed '/^fedora-release-/{/^fedora-release-common/!{/^fedora-release-identity-basic/!d}}' | tee rpms.lock
+  | sed '/^fedora-release-/{/^fedora-release-\(common\|identity-basic\|[0-9]\{1,\}\)/!d}' | tee rpms.lock
