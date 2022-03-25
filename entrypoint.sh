@@ -25,19 +25,9 @@ then
 fi
 
 
-dnf_repos="
-	--repofrompath releases-tmp,${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Everything/x86_64/os
-	--repofrompath updates-tmp,${FEDORA_MIRROR}/updates/${FEDORA_MAJOR}/Everything/x86_64
-	--repo releases-tmp
-	--repo updates-tmp
-	--repo docker-ce-stable
-"
-
-
 # Download rpms
 mkdir -p downloads
 cat rpms.lock | xargs -n256 dnf download \
-  ${dnf_repos} \
   --arch=x86_64 --arch=noarch \
   --downloaddir=downloads
 while read package

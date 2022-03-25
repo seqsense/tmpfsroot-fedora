@@ -15,24 +15,26 @@ RUN --mount=type=cache,target=/var/cache/dnf \
     pykickstart \
     wget \
   && dnf clean all \
+  && rm /etc/yum.repos.d/*.repo \
   && dnf config-manager \
     --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+COPY fedora.repo /etc/yum.repos.d/
 
 WORKDIR /work
 
 RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
 
-ARG FEDORA_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
+ARG FEDORA_ISO_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
 ARG FEDORA_VERSION
 ARG FEDORA_MAJOR
 ENV FEDORA_VERSION=${FEDORA_VERSION} \
-  FEDORA_MIRROR=${FEDORA_MIRROR} \
   FEDORA_MAJOR=${FEDORA_MAJOR}
 RUN curl --fail -L --remote-name \
-    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+    ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
   && isofile=Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
   && curl --fail -L --remote-name \
-    ${FEDORA_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
+    ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
   && gpg --verify *-CHECKSUM \
   && sha256sum --ignore-missing -c *-CHECKSUM \
   && mkdir ./iso-root \

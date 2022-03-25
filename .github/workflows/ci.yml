@@ -19,22 +19,6 @@ jobs:
       MAKE: make FEDORA_VERSION=${{ matrix.fedora }}
     runs-on: ubuntu-latest
     steps:
-      - name: Select mirror
-        run: |
-          for url in \
-            https://mirror.genesisadaptive.com/fedora/linux \
-            http://mirror.math.princeton.edu/pub/fedora/linux
-          do
-            echo "Trying ${url}"
-            if (curl --fail -L --connect-timeout 5 ${url} > /dev/null 2> /dev/null)
-            then
-              echo "FEDORA_MIRROR=${url}" >> ${GITHUB_ENV}
-              exit 0
-            fi
-          done
-          echo "No mirror is available"
-          false
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -42,9 +26,9 @@ jobs:
         run: echo "FEDORA_MAJOR=$(${MAKE} show-fedora-major)" >> ${GITHUB_ENV}
 
       - name: Build builder image
-        run: ${MAKE} builder FEDORA_MIRROR=${FEDORA_MIRROR}
+        run: ${MAKE} builder
       - name: Build updater image
-        run: ${MAKE} updater FEDORA_MIRROR=${FEDORA_MIRROR}
+        run: ${MAKE} updater
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'

@@ -9,15 +9,17 @@ RUN --mount=type=cache,target=/var/cache/dnf \
     findutils \
     make \
   && dnf clean all \
+  && rm /etc/yum.repos.d/*.repo \
   && dnf config-manager \
     --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
 
+COPY fedora.repo /etc/yum.repos.d/
+RUN sed '/fastestmirror=/d' -i /etc/yum.repos.d/fedora.repo
+
 VOLUME /var/cache/dnf
 
-ARG FEDORA_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
 ARG FEDORA_MAJOR
-ENV FEDORA_MAJOR=${FEDORA_MAJOR} \
-  FEDORA_MIRROR=${FEDORA_MIRROR}
+ENV FEDORA_MAJOR=${FEDORA_MAJOR}
 
 VOLUME /work
 WORKDIR /work
