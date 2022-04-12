@@ -53,7 +53,7 @@ jobs:
       - name: Upload to GitHub Container Registry (tag)
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          tag=${GITHUB_REF#refs/tags/}
+          tag=${FEDORA_MAJOR}-${GITHUB_REF#refs/tags/}
           docker tag \
             tmprootfs-fedora-builder:${FEDORA_MAJOR} \
             ghcr.io/seqsense/tmprootfs-fedora-builder:${tag}
