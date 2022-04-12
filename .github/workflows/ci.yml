@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -37,8 +39,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.SQBOT_GITHUB_TOKEN }}
-      - name: Upload to GitHub Container Registry
-        if: github.event_name == 'push'
+      - name: Upload to GitHub Container Registry (latest)
+        if: github.ref == 'refs/heads/main'
         run: |
           docker tag \
             tmprootfs-fedora-builder:${FEDORA_MAJOR} \
@@ -48,3 +50,15 @@ jobs:
             ghcr.io/seqsense/tmprootfs-fedora-updater:${FEDORA_MAJOR}
           docker push ghcr.io/seqsense/tmprootfs-fedora-builder:${FEDORA_MAJOR}
           docker push ghcr.io/seqsense/tmprootfs-fedora-updater:${FEDORA_MAJOR}
+      - name: Upload to GitHub Container Registry (tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag=${GITHUB_REF#refs/tags/}
+          docker tag \
+            tmprootfs-fedora-builder:${FEDORA_MAJOR} \
+            ghcr.io/seqsense/tmprootfs-fedora-builder:${tag}
+          docker tag \
+            tmprootfs-fedora-updater:${FEDORA_MAJOR} \
+            ghcr.io/seqsense/tmprootfs-fedora-updater:${tag}
+          docker push ghcr.io/seqsense/tmprootfs-fedora-builder:${tag}
+          docker push ghcr.io/seqsense/tmprootfs-fedora-updater:${tag}
