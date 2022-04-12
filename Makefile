@@ -7,8 +7,8 @@ ifeq ($(shell cat /etc/timezone),Asia/Tokyo)
 BUILD_OPTS := --build-arg FEDORA_ISO_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
 endif
 
-BUILDER_IMAGE := tmprootfs-fedora-builder:$(FEDORA_MAJOR)
-UPDATER_IMAGE := tmprootfs-fedora-updater:$(FEDORA_MAJOR)
+BUILDER_IMAGE := tmpfsroot-fedora-builder:$(FEDORA_MAJOR)
+UPDATER_IMAGE := tmpfsroot-fedora-updater:$(FEDORA_MAJOR)
 
 export DOCKER_BUILDKIT = 1
 
