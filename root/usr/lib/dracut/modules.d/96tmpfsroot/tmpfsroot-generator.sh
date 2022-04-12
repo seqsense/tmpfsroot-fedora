@@ -37,6 +37,7 @@ EOS
 
 cat <<EOS > "$GENERATOR_DIR"/setup-sysroot.service
 [Unit]
+DefaultDependencies=no
 Before=initrd-root-fs.target
 After=sysroot.mount
 
