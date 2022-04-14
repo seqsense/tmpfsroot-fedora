@@ -56,7 +56,7 @@ is_downloaded() {
 split_package_name() {
   echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\.fc[0-9]\+\)/\1 \2 \3/p'
 }
-warn_if_missing() {
+warn_if_not_in_dnf_repo() {
   if grep "^No package $1.* available.$" download.err > /dev/null 2> /dev/null
   then
     line_num=$(grep -n "$1" rpms.lock | cut -f1 -d:)
@@ -72,7 +72,8 @@ do
 
   if is_downloaded ${package}
   then
-    warn_if_missing ${package}
+    # Warn if not found in dnf repo but in local cache
+    warn_if_not_in_dnf_repo ${package}
     continue
   fi
 
@@ -99,7 +100,8 @@ do
 
   if is_downloaded ${package}
   then
-    warn_if_missing ${package}
+    # Warn if not found in dnf repo and local cache but in kojipkgs
+    warn_if_not_in_dnf_repo ${package}
     continue
   fi
 
