@@ -45,7 +45,7 @@ do
   fi
 done < <(cd downloads; ls -1 *.rpm)
 
-# Check missing packages
+# Check missing packages and download old packages from kojipkgs
 is_downloaded() {
   if ls downloads/$1.* > /dev/null 2> /dev/null
   then
@@ -53,17 +53,6 @@ is_downloaded() {
   fi
   return 1
 }
-
-while read package
-do
-  if ! is_downloaded ${package}
-  then
-    # Error will be printed
-    continue
-  fi
-done < <(sed -n 's/^No package \(\S*\) available\.$/\1/p' download.err)
-
-# Download old packages from kojipkgs
 split_package_name() {
   echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\.fc[0-9]\+\)/\1 \2 \3/p'
 }
