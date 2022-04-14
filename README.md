@@ -81,7 +81,7 @@ export FEDORA_MAJOR=33
     docker run \
       -i --rm \
       -v $(pwd):/work \
-      tmprootfs-fedora-updater:${FEDORA_MAJOR}
+      tmpfsroot-fedora-updater:${FEDORA_MAJOR}
     ```
 
 ### Add files and scripts
@@ -126,7 +126,7 @@ docker run -i --rm \
   -e PARTSIZE_LOG \
   -e PARTSIZE_CACHE \
   -e PARTSIZE_OPT \
-  tmprootfs-fedora-builder:${FEDORA_MAJOR}
+  tmpfsroot-fedora-builder:${FEDORA_MAJOR}
 ```
 
 ## References
