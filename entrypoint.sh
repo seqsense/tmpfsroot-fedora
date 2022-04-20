@@ -60,7 +60,7 @@ warn_if_not_in_dnf_repo() {
   if grep "^No package $1.* available.$" download.err > /dev/null 2> /dev/null
   then
     line_num=$(grep -n "$1" rpms.lock | cut -f1 -d:)
-    echo "::warning file=rpms.lock,line=${line_num},title=Package $1 missing from the repositories"
+    echo "::warning file=rpms.lock,line=${line_num}::Package $1 missing from the repositories"
   fi
 }
 
@@ -105,7 +105,7 @@ do
     continue
   fi
 
-  echo "::error file=rpms.lock,line=${line_num},title=Package ${package} unavailable"
+  echo "::error file=rpms.lock,line=${line_num}::Package ${package} unavailable"
   error=true
 done < rpms.lock
 
@@ -170,7 +170,7 @@ sed "
 
 
 # Create manifest
-cat packages.list | grep -v '^-x' | xargs -n1 -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" > packagereqs.xml
+cat packages.list | grep -v '^-x' | xargs -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" > packagereqs.xml
 sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml > iso-root/comps.xml
 createrepo -g comps.xml iso-root/
 
