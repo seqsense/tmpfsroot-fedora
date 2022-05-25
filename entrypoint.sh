@@ -196,9 +196,9 @@ fi
 if [ -d installfs.override ]
 then
   mkdir -p /tmp/installfs
-  unsquashfs iso-root/images/install.img -d /tmp/installfs
+  unsquashfs -d /tmp/installfs iso-root/images/install.img
   cp -r installfs.override/* /tmp/installfs/
-  mksquashfs /tmp/installfs iso-root/images/install.img -comp xz
+  mksquashfs /tmp/installfs iso-root/images/install.img -noappend -comp xz -Xbcj x86
 fi
 
 
