@@ -13,6 +13,7 @@ RUN --mount=type=cache,target=/var/cache/dnf \
     git \
     make \
     pykickstart \
+    squashfs-tools \
     wget \
   && dnf clean all \
   && rm /etc/yum.repos.d/*.repo \
