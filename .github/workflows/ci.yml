@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         fedora:
-          - 33-1.2
           - 34-1.2
           - 35-1.2
           - 36-1.5
