@@ -192,6 +192,16 @@ then
 fi
 
 
+# Copy custom files to install.img
+if [ -d installfs.override ]
+then
+  mkdir -p /tmp/installfs
+  unsquashfs -d /tmp/installfs iso-root/images/install.img
+  cp -r installfs.override/* /tmp/installfs/
+  mksquashfs /tmp/installfs iso-root/images/install.img -noappend -comp xz -Xbcj x86
+fi
+
+
 # Generate iso
 mkisofs \
   -o /work/output/fedora-custom.iso \
