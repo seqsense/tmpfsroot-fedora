@@ -2,21 +2,41 @@
 
 set -eu
 
+required_list=/usr/share/tmpfsroot-fedora/required-services
+
+if [ ! -f ${required_list} ]
+then
+  echo "${required_list} not found" >&2
+  exit 1
+fi
+
+required_services="$(cat ${required_list})"
+
 while true
 do
-  # Check uptime of sq-edge-host-agent
-  . <(systemctl show sq-edge-host-agent.service \
-        --property=ExecMainStartTimestamp \
-        --property=ActiveState \
-      | sed 's/^\([^=]*\)=\(.*\)$/\1="\2"/')
+  need_wait=false
+  for srv in ${required_services}
+  do
+    # Check uptime of the service
+    . <(systemctl show ${srv} \
+          --property=ExecMainStartTimestamp \
+          --property=ActiveState \
+        | sed 's/^\([^=]*\)=\(.*\)$/\1="\2"/')
 
-  exec_timestamp=$(date --date="$(echo $ExecMainStartTimestamp | cut -d" " -f2-3)" +%s)
-  now_timestamp=$(date +%s)
-  active_duration=$(expr ${now_timestamp} - ${exec_timestamp})
-  if [ "${ActiveState}" != "active" ] \
-    || [ ${active_duration} -lt 30 ]
+    exec_timestamp=$(date --date="$(echo $ExecMainStartTimestamp | cut -d" " -f2-3)" +%s)
+    now_timestamp=$(date +%s)
+    active_duration=$(expr ${now_timestamp} - ${exec_timestamp})
+    if [ "${ActiveState}" != "active" ] \
+      || [ ${active_duration} -lt 30 ]
+    then
+      echo "${srv} is not continuously running" >&2
+      need_wait=true
+      break
+    fi
+  done
+
+  if ${need_wait}
   then
-    echo "sq-edge-host-agent is not continuously running" >&2
     sleep 30
     continue
   fi
