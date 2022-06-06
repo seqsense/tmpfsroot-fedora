@@ -44,9 +44,13 @@ do
   break
 done
 
+dev_efi=$(blkid --match-token PARTLABEL="EFI System Partition")
 mnt_efi=$(mktemp -d)
-mount /dev/sda1 ${mnt_efi} -o ro
-trap "umount /dev/sda1" EXIT
+
+test -b ${dev_efi} # detected device must be block special
+
+mount ${dev_efi} ${mnt_efi} -o ro
+trap "umount ${dev_efi}" EXIT
 
 . <(cat /etc/default/grub | grep GRUB_DISK_UUID)
 . <(grub2-editenv ${mnt_efi}/EFI/fedora/grubenv list | grep saved_entry)
@@ -86,7 +90,7 @@ then
 fi
 
 echo "Setting boot rootfs to ${current_id} (${current_num})"
-mount /dev/sda1 ${mnt_efi} -o rw,remount
+mount ${dev_efi} ${mnt_efi} -o rw,remount
 grub2-editenv ${mnt_efi}/EFI/fedora/grubenv set saved_entry=${current_num}
 grub2-editenv ${mnt_efi}/EFI/fedora/grubenv unset next_entry
 grub2-editenv ${mnt_efi}/EFI/fedora/grubenv unset prev_saved_entry
