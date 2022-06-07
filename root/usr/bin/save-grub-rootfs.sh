@@ -10,7 +10,8 @@ then
   exit 1
 fi
 
-required_services="$(cat ${required_list})"
+required_services="$(echo $(cat ${required_list}))"
+echo "checking ${required_services}..."
 
 while true
 do
@@ -44,10 +45,11 @@ do
   break
 done
 
-dev_efi=$(blkid --match-token PARTLABEL="EFI System Partition")
+dev_efi=$(blkid --match-token PARTLABEL="EFI System Partition" -o device)
 mnt_efi=$(mktemp -d)
 
-test -b ${dev_efi} # detected device must be block special
+echo " EFI partition: ${dev_efi}"
+test -b "${dev_efi}" # detected device must be block special
 
 mount ${dev_efi} ${mnt_efi} -o ro
 trap "umount ${dev_efi}" EXIT
