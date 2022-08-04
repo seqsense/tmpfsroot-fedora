@@ -54,7 +54,11 @@ is_downloaded() {
   return 1
 }
 split_package_name() {
-  echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\.fc[0-9]\+\)/\1 \2 \3/p'
+  # Example formats:
+  # - pkg-name-1.2-9.fc36.8 -> pkg-name 1.2   9.fc36.8
+  # - pkg-name-1.2.3-9.fc36 -> pkg-name 1.2.3 9.fc36
+  # - pkg-name-1.2-9        -> pkg-name 1.2   9
+  echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\(\.fc[0-9]\+\(\.[0-9]\+\)\?\)\?\)/\1 \2 \3/p'
 }
 warn_if_not_in_dnf_repo() {
   if grep "^No package $1.* available.$" download.err > /dev/null 2> /dev/null
@@ -80,6 +84,14 @@ do
   echo "Downloading ${package} from kojipkgs"
 
   pkg_fields=$(split_package_name ${package})
+
+  if [ -z "${pkg_fields}" ]
+  then
+    echo "::error file=rpms.lock,line=${line_num}::Failed to parse package name: ${package}"
+    error=true
+    continue
+  fi
+
   pkg_name=$(echo ${pkg_fields} | cut -f1 -d" ")
   pkg_version=$(echo ${pkg_fields} | cut -f2 -d" ")
   pkg_suffix=$(echo ${pkg_fields} | cut -f3 -d" ")
@@ -89,12 +101,12 @@ do
   src_name=$(echo ${src_fields} | cut -f1 -d" ")
   for pkg_arch in ${arch} noarch
   do
-    if wget -q \
-      https://kojipkgs.fedoraproject.org/packages/${src_name}/${pkg_version}/${pkg_suffix}/${pkg_arch}/${package}.${pkg_arch}.rpm \
-      -O downloads/${package}.${pkg_arch}.rpm
+    url="https://kojipkgs.fedoraproject.org/packages/${src_name}/${pkg_version}/${pkg_suffix}/${pkg_arch}/${package}.${pkg_arch}.rpm"
+    if wget -q ${url} -O downloads/${package}.${pkg_arch}.rpm
     then
       break
     fi
+    echo "- failed to download ${url}"
     rm downloads/${package}.${pkg_arch}.rpm
   done
 
