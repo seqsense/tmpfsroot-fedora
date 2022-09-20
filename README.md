@@ -130,4 +130,10 @@ docker run -i --rm \
 ```
 
 ## References
+
 - [Kickstart](https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html)
+
+
+## License
+
+Unless otherwise noted, the sources are licensed under [Apache License Version 2.0](./LICENSE).
