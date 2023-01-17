@@ -4,8 +4,7 @@ top_level_subvolume=$1
 file_system=$2
 tmp_mount_point=/tmp/btrfs_$1
 
-function mount_filesystem()
-{
+function mount_filesystem() {
   mkdir -p ${tmp_mount_point}
   mount -v LABEL=${top_level_subvolume} ${tmp_mount_point} || {
     echo -e "Mount failed on ${tmp_mount_point}"
@@ -14,18 +13,15 @@ function mount_filesystem()
   }
 }
 
-function umount_filesystem()
-{
+function umount_filesystem() {
   umount -v ${tmp_mount_point} || umount -vl ${tmp_mount_point}
   rm -rf ${tmp_mount_point}
 }
 
-function load_snapshot()
-{
+function load_snapshot() {
   local _line _current_rollback_snapshot _count_snapshot
   _count_snapshot=0
-  while read _line
-  do
+  while read _line; do
     _current_rollback_snapshot[$_count_snapshot]="${_line}"
     ((_count_snapshot++))
   done < <(btrfs subvolume list -r ${tmp_mount_point} | awk 'match($9, /^@/) {print $9}')
@@ -64,7 +60,7 @@ if [ $# -ne 2 ]; then
   exit 1
 fi
 
-cat /etc/fstab | grep $2 > /dev/null 2>&1
+cat /etc/fstab | grep $2 >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "Target filesystem does not exist"
   exit 1

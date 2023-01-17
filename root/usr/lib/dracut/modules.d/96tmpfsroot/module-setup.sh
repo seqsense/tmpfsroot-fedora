@@ -1,11 +1,11 @@
 #!/bin/bash
 
 check() {
-    return 0
+  return 0
 }
 
 depends() {
-    echo fs-lib
+  echo fs-lib
 }
 
 install() {
