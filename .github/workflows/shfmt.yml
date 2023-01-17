@@ -1,0 +1,14 @@
+name: format
+on:
+  pull_request:
+
+jobs:
+  shfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Apply format
+        run: go run mvdan.cc/sh/v3/cmd/shfmt@latest -i 2 -ci -bn -l -w .
+      - name: Check diff
+        run: git diff --exit-code
+
