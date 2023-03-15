@@ -27,15 +27,24 @@ WORKDIR /work
 RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
 
 ARG FEDORA_ISO_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
+ARG FEDORA_ISO_ARCHIVE=https://archives.fedoraproject.org/pub/archive/fedora/linux
 ARG FEDORA_VERSION
 ARG FEDORA_MAJOR
 ENV FEDORA_VERSION=${FEDORA_VERSION} \
   FEDORA_MAJOR=${FEDORA_MAJOR}
-RUN curl --fail -L --remote-name \
-    ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+RUN ( \
+    curl --fail -L --remote-name \
+        ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+    || curl --fail -L --remote-name \
+        ${FEDORA_ISO_ARCHIVE}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+  ) \
   && isofile=Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
-  && curl --fail -L --remote-name \
-    ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
+  && ( \
+    curl --fail -L --remote-name \
+      ${FEDORA_ISO_MIRROR}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
+    || curl --fail -L --remote-name \
+      ${FEDORA_ISO_ARCHIVE}/releases/${FEDORA_MAJOR}/Server/x86_64/iso/${isofile} \
+  ) \
   && gpg --verify *-CHECKSUM \
   && sha256sum --ignore-missing -c *-CHECKSUM \
   && mkdir ./iso-root \
