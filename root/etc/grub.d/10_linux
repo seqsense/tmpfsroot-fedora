@@ -8,11 +8,9 @@ insmod ext2
 
 EOS
 
-for uuid in ${GRUB_DISK_UUID0:-} ${GRUB_DISK_UUID1:-}
-do
+for uuid in ${GRUB_DISK_UUID0:-} ${GRUB_DISK_UUID1:-}; do
   echo "# UUID=${uuid}"
-  if [ -n "${uuid}" ]
-  then
+  if [ -n "${uuid}" ]; then
     cat <<EOS
 menuentry "sq-robot ${uuid}" {
   search --no-floppy --fs-uuid --set root ${uuid}

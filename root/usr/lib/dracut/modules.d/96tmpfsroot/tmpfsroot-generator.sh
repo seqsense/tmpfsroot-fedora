@@ -13,7 +13,7 @@ GENERATOR_DIR="$2"
 
 rootdev="/dev/disk/by-uuid/${root#UUID=}"
 
-cat <<EOS > "$GENERATOR_DIR"/sysroot.mount
+cat <<EOS >"$GENERATOR_DIR"/sysroot.mount
 [Unit]
 Wants=setup-sysroot.service
 
@@ -24,7 +24,7 @@ Options=mode=0755,size=$size
 Type=tmpfs
 EOS
 
-cat <<EOS > "$GENERATOR_DIR"/sysrootro.mount
+cat <<EOS >"$GENERATOR_DIR"/sysrootro.mount
 [Unit]
 DefaultDependencies=no
 
@@ -35,7 +35,7 @@ Options=ro,noload
 Type=ext4
 EOS
 
-cat <<EOS > "$GENERATOR_DIR"/setup-sysroot.service
+cat <<EOS >"$GENERATOR_DIR"/setup-sysroot.service
 [Unit]
 DefaultDependencies=no
 Before=initrd-root-fs.target

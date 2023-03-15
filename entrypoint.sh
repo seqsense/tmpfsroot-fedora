@@ -4,29 +4,24 @@ set -eu
 
 arch=${ARCH:-x86_64}
 
-
-if [ ! -f rpms.lock ]
-then
+if [ ! -f rpms.lock ]; then
   echo "rpms.lock not found"
 fi
 
-if [ ! -f packages.list ]
-then
+if [ ! -f packages.list ]; then
   echo "packages.list not found"
 fi
 
-if [ -z ${DISK_DEVS} ] || \
-  [ -z ${MAIN_DISK} ] || \
-  [ -z ${PARTSIZE_DOCKER} ] || \
-  [ -z ${PARTSIZE_LOG} ] || \
-  [ -z ${PARTSIZE_CACHE} ] || \
-  [ -z ${PARTSIZE_OPT} ]
-then
+if [ -z ${DISK_DEVS} ] \
+  || [ -z ${MAIN_DISK} ] \
+  || [ -z ${PARTSIZE_DOCKER} ] \
+  || [ -z ${PARTSIZE_LOG} ] \
+  || [ -z ${PARTSIZE_CACHE} ] \
+  || [ -z ${PARTSIZE_OPT} ]; then
   echo "Required variables not set" >&2
   echo "required: DISK_DEVS, MAIN_DISK, PARTSIZE_DOCKER, PARTSIZE_LOG, PARTSIZE_CACHE, PARTSIZE_OPT" >&2
   exit 1
 fi
-
 
 # Download rpms
 mkdir -p downloads
@@ -37,18 +32,18 @@ cat rpms.lock | xargs -n256 dnf download \
   2> >(tee download.err >&2)
 
 # Remove old packages
-while read package
-do
-  if ! grep "^${package%.*.rpm}$" rpms.lock > /dev/null
-  then
+while read package; do
+  if ! grep "^${package%.*.rpm}$" rpms.lock >/dev/null; then
     rm -fv downloads/${package}
   fi
-done < <(cd downloads; ls -1 *.rpm)
+done < <(
+  cd downloads
+  ls -1 *.rpm
+)
 
 # Check missing packages and download old packages from kojipkgs
 is_downloaded() {
-  if ls downloads/$1.* > /dev/null 2> /dev/null
-  then
+  if ls downloads/$1.* >/dev/null 2>/dev/null; then
     return 0
   fi
   return 1
@@ -61,8 +56,7 @@ split_package_name() {
   echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\(\.fc[0-9]\+\(\.[0-9]\+\)\?\)\?\)/\1 \2 \3/p'
 }
 warn_if_not_in_dnf_repo() {
-  if grep "^No package $1.* available.$" download.err > /dev/null 2> /dev/null
-  then
+  if grep "^No package $1.* available.$" download.err >/dev/null 2>/dev/null; then
     line_num=$(grep -n "$1" rpms.lock | cut -f1 -d:)
     echo "::warning file=rpms.lock,line=${line_num}::Package $1 missing from the repositories"
   fi
@@ -70,12 +64,10 @@ warn_if_not_in_dnf_repo() {
 
 line_num=-1
 error=false
-while read package
-do
+while read package; do
   (line_num+=1)
 
-  if is_downloaded ${package}
-  then
+  if is_downloaded ${package}; then
     # Warn if not found in dnf repo but in local cache
     warn_if_not_in_dnf_repo ${package}
     continue
@@ -85,8 +77,7 @@ do
 
   pkg_fields=$(split_package_name ${package})
 
-  if [ -z "${pkg_fields}" ]
-  then
+  if [ -z "${pkg_fields}" ]; then
     echo "::error file=rpms.lock,line=${line_num}::Failed to parse package name: ${package}"
     error=true
     continue
@@ -99,19 +90,16 @@ do
   pkg_src=$(dnf info --available ${pkg_name} | sed -n 's/^Source\s*:\s*\(\S\+\).src.rpm/\1/p')
   src_fields=$(split_package_name ${pkg_src})
   src_name=$(echo ${src_fields} | cut -f1 -d" ")
-  for pkg_arch in ${arch} noarch
-  do
+  for pkg_arch in ${arch} noarch; do
     url="https://kojipkgs.fedoraproject.org/packages/${src_name}/${pkg_version}/${pkg_suffix}/${pkg_arch}/${package}.${pkg_arch}.rpm"
-    if wget -q ${url} -O downloads/${package}.${pkg_arch}.rpm
-    then
+    if wget -q ${url} -O downloads/${package}.${pkg_arch}.rpm; then
       break
     fi
     echo "- failed to download ${url}"
     rm downloads/${package}.${pkg_arch}.rpm
   done
 
-  if is_downloaded ${package}
-  then
+  if is_downloaded ${package}; then
     # Warn if not found in dnf repo and local cache but in kojipkgs
     warn_if_not_in_dnf_repo ${package}
     continue
@@ -119,10 +107,9 @@ do
 
   echo "::error file=rpms.lock,line=${line_num}::Package ${package} unavailable"
   error=true
-done < rpms.lock
+done <rpms.lock
 
-if ${error}
-then
+if ${error}; then
   echo "Missing packages" >&2
   exit 1
 fi
@@ -130,13 +117,11 @@ fi
 # Generate iso
 rm -rf iso-root/Packages
 mkdir -p iso-root/Packages
-while read rpm
-do
+while read rpm; do
   initial=${rpm:0:1}
   mkdir -p iso-root/Packages/${initial}
   cp ./downloads/${rpm}.*.rpm iso-root/Packages/${initial}/
-done < rpms.lock
-
+done <rpms.lock
 
 # Create custom install files tarball
 cp -ar root.override/* root/ || true
@@ -178,38 +163,29 @@ sed "
       n
       e cat ks2/ks.root.cfg
     }
-  " ks.tpl.cfg > iso-root/ks.cfg
-
+  " ks.tpl.cfg >iso-root/ks.cfg
 
 # Create manifest
-cat packages.list | grep -v '^-x' | xargs -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" > packagereqs.xml
-sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml > iso-root/comps.xml
+cat packages.list | grep -v '^-x' | xargs -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" >packagereqs.xml
+sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml >iso-root/comps.xml
 createrepo -g comps.xml iso-root/
 
-
 # Custom scripts
-if [ -d build-hooks.d ]
-then
-  for script in build-hooks.d/*.sh
-  do
+if [ -d build-hooks.d ]; then
+  for script in build-hooks.d/*.sh; do
     ${script}
   done
 fi
 
-
 # Copy custom iso-root files
-if [ -d iso-root.override ]
-then
+if [ -d iso-root.override ]; then
   cp -r iso-root.override/* iso-root/
 fi
 
-
 # Copy custom files to product.img
-if [ -d installfs.override ]
-then
+if [ -d installfs.override ]; then
   mksquashfs installfs.override iso-root/images/product.img -noappend -comp xz -Xbcj x86
 fi
-
 
 # Generate iso
 mkisofs \
