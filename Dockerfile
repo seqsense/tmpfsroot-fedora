@@ -24,7 +24,8 @@ COPY fedora.repo /etc/yum.repos.d/
 
 WORKDIR /work
 
-RUN curl --fail https://getfedora.org/static/fedora.gpg | gpg --import
+COPY fedora.pub /
+RUN gpg --import /fedora.pub
 
 ARG FEDORA_ISO_MIRROR=https://dl.fedoraproject.org/pub/fedora/linux
 ARG FEDORA_ISO_ARCHIVE=https://archives.fedoraproject.org/pub/archive/fedora/linux
