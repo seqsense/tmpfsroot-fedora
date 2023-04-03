@@ -87,7 +87,11 @@ while read package; do
   pkg_version=$(echo ${pkg_fields} | cut -f2 -d" ")
   pkg_suffix=$(echo ${pkg_fields} | cut -f3 -d" ")
 
-  pkg_src=$(dnf info --available ${pkg_name} | sed -n 's/^Source\s*:\s*\(\S\+\).src.rpm/\1/p')
+  pkg_src=$(
+    dnf info ${pkg_name} \
+      | sed -n 's/^Source\s*:\s*\(\S\+\).src.rpm/\1/p' \
+      | head -n1
+  )
   src_fields=$(split_package_name ${pkg_src})
   src_name=$(echo ${src_fields} | cut -f1 -d" ")
   for pkg_arch in ${arch} noarch; do
