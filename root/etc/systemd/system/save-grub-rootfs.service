@@ -1,6 +1,5 @@
 [Unit]
 Description=Save grub rootfs entry
-After=sq-edge-host-agent.service
 
 [Service]
 ExecStartPre=/bin/sleep 60
