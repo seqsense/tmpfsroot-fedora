@@ -12,7 +12,7 @@ for uuid in ${GRUB_DISK_UUID0:-} ${GRUB_DISK_UUID1:-}; do
   echo "# UUID=${uuid}"
   if [ -n "${uuid}" ]; then
     cat <<EOS
-menuentry "sq-robot ${uuid}" {
+menuentry "tmpfsroot-fedora ${uuid}" {
   search --no-floppy --fs-uuid --set root ${uuid}
   linux /boot/vmlinuz root=UUID=${uuid} ro ${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}
   initrd /boot/initramfs.img
