@@ -8,10 +8,12 @@ RUN --mount=type=cache,target=/var/cache/dnf \
     cpio \
     createrepo \
     dnf-plugins-core \
+    dosfstools \
     findutils \
     genisoimage \
     git \
     make \
+    mtools \
     pykickstart \
     squashfs-tools \
     wget \

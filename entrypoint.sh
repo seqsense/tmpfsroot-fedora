@@ -191,16 +191,53 @@ if [ -d installfs.override ]; then
   mksquashfs installfs.override iso-root/images/product.img -noappend -comp xz -Xbcj x86
 fi
 
+eltorito_boot=isolinux/isolinux.bin
+efi_boot=images/efiboot.img
+if [ ${FEDORA_MAJOR} -gt 37 ]; then
+  eltorito_boot=images/eltorito.img
+fi
+
+if [ ! -f iso-root/${efi_boot} ]; then
+  echo "Generating EFI image"
+  # Generate EFI image
+  dd \
+    if=/dev/zero \
+    of=iso-root/${efi_boot} \
+    bs=512 \
+    count=16384
+  mkfs.msdos \
+    -F 12 \
+    -n EFI \
+    iso-root/${efi_boot}
+  mmd \
+    -i iso-root/${efi_boot} \
+    ::EFI
+  mmd \
+    -i iso-root/${efi_boot} \
+    ::EFI/BOOT
+  mcopy \
+    -i iso-root/${efi_boot} \
+    iso-root/EFI/BOOT/BOOTX64.EFI \
+    ::EFI/BOOT/BOOTX64.EFI
+  mcopy \
+    -i iso-root/${efi_boot} \
+    iso-root/EFI/BOOT/grubx64.efi \
+    ::EFI/BOOT/grubx64.efi
+fi
+
+ls -lah iso-root/${eltorito_boot}
+ls -lah iso-root/${efi_boot}
+
 # Generate iso
 mkisofs \
   -o /work/output/fedora-custom.iso \
-  -b isolinux/isolinux.bin \
-  -c isolinux/boot.cat \
+  -eltorito-boot ${eltorito_boot} \
+  -eltorito-catalog isolinux/boot.cat \
   -no-emul-boot \
   -boot-load-size 4 \
   -boot-info-table \
   -eltorito-alt-boot \
-  -e images/efiboot.img \
+  -efi-boot ${efi_boot} \
   -no-emul-boot \
   -graft-points \
   -V tmpfsroot-fedora \
