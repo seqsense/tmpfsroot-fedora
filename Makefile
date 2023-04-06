@@ -1,7 +1,14 @@
 SHELL := /bin/bash
 
 FEDORA_VERSION ?= 35-1.2
-FEDORA_MAJOR   := $(shell echo $(FEDORA_VERSION) | cut -f1 -d-)
+
+FEDORA_MAJOR       := $(shell echo $(FEDORA_VERSION) | sed -n 's/^\([0-9]\+\)\(_\S\+\)\?-[0-9.]\+$$/\1/p')
+FEDORA_SUFFIX      := $(shell echo $(FEDORA_VERSION) | sed -n 's/^[0-9]\+_\(\S\+\)-[0-9.]\+$$/\1/p')
+ifeq ($(FEDORA_SUFFIX),Beta)
+FEDORA_RELEASE_DIR := test/$(FEDORA_MAJOR)_Beta
+else
+FEDORA_RELEASE_DIR := $(FEDORA_MAJOR)
+endif
 
 ifeq ($(shell cat /etc/timezone),Asia/Tokyo)
 BUILD_OPTS := --build-arg FEDORA_ISO_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
@@ -18,6 +25,7 @@ builder:
 		$(BUILD_OPTS) \
 		--build-arg FEDORA_VERSION=$(FEDORA_VERSION) \
 		--build-arg FEDORA_MAJOR=$(FEDORA_MAJOR) \
+		--build-arg FEDORA_RELEASE_DIR=$(FEDORA_RELEASE_DIR) \
 		-t $(BUILDER_IMAGE) \
 		.
 
