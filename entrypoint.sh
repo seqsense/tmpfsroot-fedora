@@ -180,9 +180,7 @@ for script in $(find build-hooks.d -executable -name '*.sh'); do
 done
 
 # Copy custom iso-root files
-if [ -d iso-root.override ]; then
-  cp -r iso-root.override/* iso-root/
-fi
+cp -r iso-root.override/* iso-root/ || true
 
 # Copy custom files to product.img
 if [ -d installfs.override ]; then
