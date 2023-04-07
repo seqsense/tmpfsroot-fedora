@@ -191,7 +191,7 @@ eltorito_boot=
 for img in \
   isolinux/isolinux.bin \
   images/eltorito.img; do
-  if [ ! -f ${img} ]; then
+  if [ -f iso-root/${img} ]; then
     eltorito_boot=${img}
   fi
 done
