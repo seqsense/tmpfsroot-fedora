@@ -225,9 +225,6 @@ if [ ! -f iso-root/${efi_boot} ]; then
     ::EFI/BOOT/grubx64.efi
 fi
 
-ls -lah iso-root/${eltorito_boot}
-ls -lah iso-root/${efi_boot}
-
 # Generate iso
 mkisofs \
   -o /work/output/fedora-custom.iso \
