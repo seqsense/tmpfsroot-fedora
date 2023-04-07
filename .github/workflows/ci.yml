@@ -47,7 +47,7 @@ jobs:
       - name: Test builder
         working-directory: tests/iso-build
         run: |
-          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-builder:${FEDORA_MAJOR}
           test -f output/fedora-custom.iso
           ls -lh output/fedora-custom.iso
 
