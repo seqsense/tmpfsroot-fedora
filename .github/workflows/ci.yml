@@ -51,6 +51,7 @@ jobs:
         run: |
           docker run -i --rm \
             -v $(pwd)/rpms.lock:/work/rpms.lock:ro \
+            -v $(pwd)/packages.list:/work/packages.list:ro \
             -v $(pwd)/output:/work/output \
             -e DISK_DEVS=sda \
             -e MAIN_DISK=sda \
