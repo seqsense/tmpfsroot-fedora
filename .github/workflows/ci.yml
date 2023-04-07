@@ -41,13 +41,23 @@ jobs:
       - name: Test updater
         working-directory: tests/iso-build
         run: |
-          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+          docker run -i --rm \
+            -v $(pwd):/work \
+            tmpfsroot-fedora-updater:${FEDORA_MAJOR}
           test -f rpms.lock
           cat rpms.lock
       - name: Test builder
         working-directory: tests/iso-build
         run: |
-          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-builder:${FEDORA_MAJOR}
+          docker run -i --rm \
+            -v $(pwd):/work \
+            -e DISK_DEVS=sda \
+            -e MAIN_DISK=sda \
+            -e PARTSIZE_DOCKER=1024 \
+            -e PARTSIZE_LOG=1024 \
+            -e PARTSIZE_CACHE=1024 \
+            -e PARTSIZE_OPT=1024 \
+            tmpfsroot-fedora-builder:${FEDORA_MAJOR}
           test -f output/fedora-custom.iso
           ls -lh output/fedora-custom.iso
 
