@@ -37,6 +37,19 @@ jobs:
       - name: Build updater image
         run: ${MAKE} updater
 
+      - name: Test updater
+        working-directory: tests/iso-build
+        run: |
+          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+          test -f rpms.lock
+          cat rpms.lock
+      - name: Test builder
+        working-directory: tests/iso-build
+        run: |
+          docker run -i --rm -v $(pwd):/work tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+          test -f output/fedora-custom.iso
+          ls -lh output/fedora-custom.iso
+
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
         uses: docker/login-action@v2
