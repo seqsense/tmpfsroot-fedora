@@ -50,7 +50,8 @@ jobs:
         working-directory: tests/iso-build
         run: |
           docker run -i --rm \
-            -v $(pwd):/work \
+            -v $(pwd)/rpms.lock:/work/rpms.lock:ro \
+            -v $(pwd)/output:/work/output /output:/work/output \
             -e DISK_DEVS=sda \
             -e MAIN_DISK=sda \
             -e PARTSIZE_DOCKER=1024 \
