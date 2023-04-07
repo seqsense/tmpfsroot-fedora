@@ -133,7 +133,7 @@ tar czf iso-root/custom-files.tar.gz root hooks.d
 
 # Generate kickstart config
 mkdir -p ks2
-cp ks/ks.*.cfg ks2/
+cp ks/ks.*.cfg ks2/ || true
 (cd ks2 && touch ks.post.cfg ks.post-nochroot.cfg ks.pre.cfg ks.pre-install.cfg ks.root.cfg)
 sed "
     s/@@DISK_DEVS@@/${DISK_DEVS}/g
@@ -175,16 +175,12 @@ sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml >iso-root/comps.xm
 createrepo -g comps.xml iso-root/
 
 # Custom scripts
-if [ -d build-hooks.d ]; then
-  for script in build-hooks.d/*.sh; do
-    ${script}
-  done
-fi
+for script in $(find build-hooks.d -executable -name '*.sh'); do
+  ${script}
+done
 
 # Copy custom iso-root files
-if [ -d iso-root.override ]; then
-  cp -r iso-root.override/* iso-root/
-fi
+cp -r iso-root.override/* iso-root/ || true
 
 # Copy custom files to product.img
 if [ -d installfs.override ]; then
