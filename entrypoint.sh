@@ -191,10 +191,19 @@ if [ -d installfs.override ]; then
   mksquashfs installfs.override iso-root/images/product.img -noappend -comp xz -Xbcj x86
 fi
 
-eltorito_boot=isolinux/isolinux.bin
+eltorito_boot=
+for img in \
+  isolinux/isolinux.bin \
+  images/eltorito.img; do
+  if [ ! -f ${img} ]; then
+    eltorito_boot=${img}
+  fi
+done
 efi_boot=images/efiboot.img
-if [ ${FEDORA_MAJOR} -gt 37 ]; then
-  eltorito_boot=images/eltorito.img
+
+if [ -z ${eltorito_boot} ]; then
+  echo "El torito boot image not found" >&2
+  exit 1
 fi
 
 if [ ! -f iso-root/${efi_boot} ]; then
