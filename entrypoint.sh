@@ -133,7 +133,7 @@ tar czf iso-root/custom-files.tar.gz root hooks.d
 
 # Generate kickstart config
 mkdir -p ks2
-cp ks/ks.*.cfg ks2/
+cp ks/ks.*.cfg ks2/ || true
 (cd ks2 && touch ks.post.cfg ks.post-nochroot.cfg ks.pre.cfg ks.pre-install.cfg ks.root.cfg)
 sed "
     s/@@DISK_DEVS@@/${DISK_DEVS}/g
