@@ -175,11 +175,9 @@ sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml >iso-root/comps.xm
 createrepo -g comps.xml iso-root/
 
 # Custom scripts
-if [ -d build-hooks.d ]; then
-  for script in build-hooks.d/*.sh; do
-    ${script}
-  done
-fi
+for script in $(find build-hooks.d -executable -name '*.sh'); do
+  ${script}
+done
 
 # Copy custom iso-root files
 if [ -d iso-root.override ]; then
