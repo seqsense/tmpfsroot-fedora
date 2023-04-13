@@ -133,7 +133,7 @@ tar czf iso-root/custom-files.tar.gz root hooks.d
 
 # Generate kickstart config
 mkdir -p ks2
-cp ks/ks.*.cfg ks2/
+cp ks/ks.*.cfg ks2/ || true
 (cd ks2 && touch ks.post.cfg ks.post-nochroot.cfg ks.pre.cfg ks.pre-install.cfg ks.root.cfg)
 sed "
     s/@@DISK_DEVS@@/${DISK_DEVS}/g
@@ -175,32 +175,71 @@ sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml >iso-root/comps.xm
 createrepo -g comps.xml iso-root/
 
 # Custom scripts
-if [ -d build-hooks.d ]; then
-  for script in build-hooks.d/*.sh; do
-    ${script}
-  done
-fi
+for script in $(find build-hooks.d -executable -name '*.sh'); do
+  ${script}
+done
 
 # Copy custom iso-root files
-if [ -d iso-root.override ]; then
-  cp -r iso-root.override/* iso-root/
-fi
+cp -r iso-root.override/* iso-root/ || true
 
 # Copy custom files to product.img
 if [ -d installfs.override ]; then
   mksquashfs installfs.override iso-root/images/product.img -noappend -comp xz -Xbcj x86
 fi
 
+eltorito_boot=
+for img in \
+  isolinux/isolinux.bin \
+  images/eltorito.img; do
+  if [ -f iso-root/${img} ]; then
+    eltorito_boot=${img}
+  fi
+done
+efi_boot=images/efiboot.img
+
+if [ -z ${eltorito_boot} ]; then
+  echo "El torito boot image not found" >&2
+  exit 1
+fi
+
+if [ ! -f iso-root/${efi_boot} ]; then
+  echo "Generating EFI image"
+  # Generate EFI image
+  dd \
+    if=/dev/zero \
+    of=iso-root/${efi_boot} \
+    bs=512 \
+    count=16384
+  mkfs.msdos \
+    -F 12 \
+    -n EFI \
+    iso-root/${efi_boot}
+  mmd \
+    -i iso-root/${efi_boot} \
+    ::EFI
+  mmd \
+    -i iso-root/${efi_boot} \
+    ::EFI/BOOT
+  mcopy \
+    -i iso-root/${efi_boot} \
+    iso-root/EFI/BOOT/BOOTX64.EFI \
+    ::EFI/BOOT/BOOTX64.EFI
+  mcopy \
+    -i iso-root/${efi_boot} \
+    iso-root/EFI/BOOT/grubx64.efi \
+    ::EFI/BOOT/grubx64.efi
+fi
+
 # Generate iso
 mkisofs \
   -o /work/output/fedora-custom.iso \
-  -b isolinux/isolinux.bin \
-  -c isolinux/boot.cat \
+  -eltorito-boot ${eltorito_boot} \
+  -eltorito-catalog isolinux/boot.cat \
   -no-emul-boot \
   -boot-load-size 4 \
   -boot-info-table \
   -eltorito-alt-boot \
-  -e images/efiboot.img \
+  -efi-boot ${efi_boot} \
   -no-emul-boot \
   -graft-points \
   -V tmpfsroot-fedora \

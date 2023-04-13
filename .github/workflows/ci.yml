@@ -16,12 +16,14 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         fedora:
           - 34-1.2
           - 35-1.2
           - 36-1.5
           - 37-1.7
+          - 38_Beta-1.3
     env:
       MAKE: make FEDORA_VERSION=${{ matrix.fedora }}
     runs-on: ubuntu-latest
@@ -36,6 +38,31 @@ jobs:
         run: ${MAKE} builder
       - name: Build updater image
         run: ${MAKE} updater
+
+      - name: Test updater
+        working-directory: tests/iso-build
+        run: |
+          docker run -i --rm \
+            -v $(pwd):/work \
+            tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+          test -f rpms.lock
+          cat rpms.lock
+      - name: Test builder
+        working-directory: tests/iso-build
+        run: |
+          docker run -i --rm \
+            -v $(pwd)/rpms.lock:/work/rpms.lock:ro \
+            -v $(pwd)/packages.list:/work/packages.list:ro \
+            -v $(pwd)/output:/work/output \
+            -e DISK_DEVS=sda \
+            -e MAIN_DISK=sda \
+            -e PARTSIZE_DOCKER=1024 \
+            -e PARTSIZE_LOG=1024 \
+            -e PARTSIZE_CACHE=1024 \
+            -e PARTSIZE_OPT=1024 \
+            tmpfsroot-fedora-builder:${FEDORA_MAJOR}
+          test -f output/fedora-custom.iso
+          ls -lh output/fedora-custom.iso
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
