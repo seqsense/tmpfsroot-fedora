@@ -35,14 +35,15 @@ Mount point     | Size                 | Filesystem | Usage
 
 ## Example
 
-```
-export FEDORA_MAJOR=33
+Specify Fedora major version to be used.
+```shell
+export FEDORA_MAJOR=37
 ```
 
 ### Generate `rpms.lock`
 
 1. Add required packages to `packages.list`
-    ```
+    ```shell
     cat << EOS > packages.list
     audit
     authselect
@@ -77,11 +78,11 @@ export FEDORA_MAJOR=33
     EOS
     ```
 2. Generate `rpms.lock` from `packages.list`
-    ```
+    ```shell
     docker run \
       -i --rm \
       -v $(pwd):/work \
-      tmpfsroot-fedora-updater:${FEDORA_MAJOR}
+      ghcr.io/seqsense/tmpfsroot-fedora-updater:${FEDORA_MAJOR}
     ```
 
 ### Add files and scripts
@@ -99,7 +100,7 @@ Directory           | Files                  | Note
 
 ### Generate installer ISO
 
-```
+```shell
 export DISK_DEVS=sda,sdb     # System has /dev/sda and /dev/sdb
 export MAIN_DISK=sda         # Install OS to /dev/sda
 export PARTSIZE_DOCKER=8192  # 8G
@@ -126,7 +127,7 @@ docker run -i --rm \
   -e PARTSIZE_LOG \
   -e PARTSIZE_CACHE \
   -e PARTSIZE_OPT \
-  tmpfsroot-fedora-builder:${FEDORA_MAJOR}
+  ghcr.io/seqsense/tmpfsroot-fedora-builder:${FEDORA_MAJOR}
 ```
 
 ## References
