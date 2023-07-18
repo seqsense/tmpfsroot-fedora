@@ -170,7 +170,13 @@ sed "
   " ks.tpl.cfg >iso-root/ks.cfg
 
 # Create manifest
-cat packages.list | grep -v '^-x' | xargs -I{} echo "<packagereq type=\"mandatory\">{}</packagereq>" >packagereqs.xml
+cat packages.list | grep -v '^-x' | while read pkg; do
+  name="$(split_package_name ${pkg} | cut -f1 -d" ")"
+  if [ -z "${name}" ]; then
+    name="${pkg}"
+  fi
+  echo "<packagereq type=\"mandatory\">${name}</packagereq>"
+done >packagereqs.xml
 sed -e '/<\/packagelist>/e cat packagereqs.xml' comps.tpl.xml >iso-root/comps.xml
 createrepo -g comps.xml iso-root/
 
