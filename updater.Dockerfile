@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.2
+# syntax = docker/dockerfile:1
 ARG FEDORA_MAJOR
 FROM fedora:${FEDORA_MAJOR}
 
