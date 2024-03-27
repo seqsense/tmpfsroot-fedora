@@ -25,6 +25,7 @@ jobs:
           - 37-1.7
           - 38-1.6
           - 39-1.5
+          - 40_Beta-1.10
     env:
       MAKE: make FEDORA_VERSION=${{ matrix.fedora }}
     runs-on: ubuntu-latest

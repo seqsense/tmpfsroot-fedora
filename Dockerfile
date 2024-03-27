@@ -37,11 +37,19 @@ ARG FEDORA_RELEASE_DIR
 ENV FEDORA_VERSION=${FEDORA_VERSION} \
   FEDORA_MAJOR=${FEDORA_MAJOR} \
   FEDORA_RELEASE_DIR=${FEDORA_RELEASE_DIR}
+
+# CHECKSUM URL:
+#   - Fedora <  40: Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM
+#   - Fedora >= 40: Fedora-Server-iso-${FEDORA_VERSION}-x86_64-CHECKSUM
 RUN ( \
     curl --fail -L --remote-name \
         ${FEDORA_ISO_MIRROR}/releases/${FEDORA_RELEASE_DIR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
     || curl --fail -L --remote-name \
         ${FEDORA_ISO_ARCHIVE}/releases/${FEDORA_RELEASE_DIR}/Server/x86_64/iso/Fedora-Server-${FEDORA_VERSION}-x86_64-CHECKSUM \
+    || curl --fail -L --remote-name \
+        ${FEDORA_ISO_MIRROR}/releases/${FEDORA_RELEASE_DIR}/Server/x86_64/iso/Fedora-Server-iso-${FEDORA_VERSION}-x86_64-CHECKSUM \
+    || curl --fail -L --remote-name \
+        ${FEDORA_ISO_ARCHIVE}/releases/${FEDORA_RELEASE_DIR}/Server/x86_64/iso/Fedora-Server-iso-${FEDORA_VERSION}-x86_64-CHECKSUM \
   ) \
   && isofile=Fedora-Server-netinst-x86_64-${FEDORA_VERSION}.iso \
   && ( \
