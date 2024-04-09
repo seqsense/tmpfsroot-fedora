@@ -14,7 +14,10 @@ for uuid in ${GRUB_DISK_UUID0:-} ${GRUB_DISK_UUID1:-}; do
     cat <<EOS
 menuentry "tmpfsroot-fedora ${uuid}" {
   search --no-floppy --fs-uuid --set root ${uuid}
-  linux /boot/vmlinuz root=UUID=${uuid} ro ${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}
+  if [ -f (\${root})/boot/grub-opts ]; then
+    source (\${root})/boot/grub-opts
+  fi
+  linux /boot/vmlinuz root=UUID=${uuid} ro ${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT} \${GRUB_CMDLINE_LINUX_TMPFSROOT}
   initrd /boot/initramfs.img
 }
 EOS
