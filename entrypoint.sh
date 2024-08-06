@@ -104,7 +104,7 @@ while read package; do
       break
     fi
     echo "- failed to download ${url}"
-    rm downloads/${package}.*.rpm
+    rm -f downloads/${package}.*.rpm
   done
 
   if is_downloaded ${package}; then
