@@ -96,11 +96,15 @@ while read package; do
   src_name=$(echo ${src_fields} | cut -f1 -d" ")
   for pkg_arch in ${arch} noarch; do
     url="https://kojipkgs.fedoraproject.org/packages/${src_name}/${pkg_version}/${pkg_suffix}/${pkg_arch}/${package}.${pkg_arch}.rpm"
+    url_noarch="https://kojipkgs.fedoraproject.org/packages/${src_name}/${pkg_version}/${pkg_suffix}/noarch/${package}.noarch.rpm"
     if wget -q ${url} -O downloads/${package}.${pkg_arch}.rpm; then
       break
     fi
+    if wget -q ${url_noarch} -O downloads/${package}.noarch.rpm; then
+      break
+    fi
     echo "- failed to download ${url}"
-    rm downloads/${package}.${pkg_arch}.rpm
+    rm -f downloads/${package}.*.rpm
   done
 
   if is_downloaded ${package}; then
