@@ -24,16 +24,15 @@ if [ -z ${DISK_DEVS} ] \
 fi
 
 # Download rpms
-download_opts="--skip-broken"
+mkdir -p downloads
+download_opts="--skip-broken --downloaddir=downloads"
 if [ ${FEDORA_MAJOR} -ge 41 ]; then
   # Option for dnf5
-  download_opts="--best"
+  download_opts="--best --destdir=downloads"
 fi
-mkdir -p downloads
 cat rpms.lock | xargs -n256 dnf download \
   ${download_opts} \
   --arch=${arch} --arch=noarch \
-  --downloaddir=downloads \
   2> >(tee download.err >&2)
 
 # Remove old packages
