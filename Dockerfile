@@ -22,11 +22,11 @@ RUN --mount=type=cache,target=/var/cache/dnf \
 
 # Add docker-ce RPM repository:
 #   - Fedora <  41: dnf config-manager --add-repo URL
-#   - Fedora >= 41: dnf config-manager add-repo --from-repofile=URL
-RUN dnf config-manager add-repo \
-      --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo \
-  || dnf config-manager \
-      --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+#   - Fedora >= 41: dnf config-manager addrepo --from-repofile=URL
+RUN dnf config-manager \
+      --add-repo https://download.docker.com/linux/fedora/docker-ce.repo \
+  || dnf config-manager addrepo \
+      --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
 
 COPY fedora.repo /etc/yum.repos.d/
 
