@@ -24,9 +24,14 @@ if [ -z ${DISK_DEVS} ] \
 fi
 
 # Download rpms
+download_opts="--skip-broken"
+if [ ${FEDORA_MAJOR} -ge 41 ]; then
+  # Option for dnf5
+  download_opts="--best"
+fi
 mkdir -p downloads
 cat rpms.lock | xargs -n256 dnf download \
-  --skip-broken \
+  ${download_opts} \
   --arch=${arch} --arch=noarch \
   --downloaddir=downloads \
   2> >(tee download.err >&2)
