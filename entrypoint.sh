@@ -25,10 +25,14 @@ fi
 
 # Download rpms
 mkdir -p downloads
+download_opts="--skip-broken --downloaddir=downloads"
+if [ ${FEDORA_MAJOR} -ge 41 ]; then
+  # Option for dnf5
+  download_opts="--best --destdir=downloads"
+fi
 cat rpms.lock | xargs -n256 dnf download \
-  --skip-broken \
+  ${download_opts} \
   --arch=${arch} --arch=noarch \
-  --downloaddir=downloads \
   2> >(tee download.err >&2)
 
 # Remove old packages
