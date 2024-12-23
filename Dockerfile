@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/var/cache/dnf \
 RUN dnf config-manager add-repo \
       --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo \
   || dnf config-manager \
-      --add-repo https://download.docker.com/linux/fedora/docker-ce.repo; \
+      --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
 
 COPY fedora.repo /etc/yum.repos.d/
 
