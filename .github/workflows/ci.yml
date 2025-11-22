@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get Fedora version
         run: echo "FEDORA_MAJOR=$(${MAKE} show-fedora-major)" >> ${GITHUB_ENV}
