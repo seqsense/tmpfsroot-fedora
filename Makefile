@@ -10,7 +10,7 @@ else
 FEDORA_RELEASE_DIR := $(FEDORA_MAJOR)
 endif
 
-ifeq ($(shell cat /etc/timezone),Asia/Tokyo)
+ifeq ($(shell timedatectl show -p Timezone --value 2>/dev/null),Asia/Tokyo)
 BUILD_OPTS := --build-arg FEDORA_ISO_MIRROR=https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux
 endif
 
