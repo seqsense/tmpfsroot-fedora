@@ -135,6 +135,19 @@ while read rpm; do
   cp ./downloads/${rpm}.*.rpm iso-root/Packages/${initial}/
 done <rpms.lock
 
+# Bake base passwd/group into the ISO
+setup_rpm=$(ls iso-root/Packages/s/setup-*.rpm 2>/dev/null | head -n1)
+if [ -z "${setup_rpm}" ]; then
+  echo "setup package not found in iso-root/Packages" >&2
+  exit 1
+fi
+rm -rf setup-base
+mkdir -p setup-base
+(cd setup-base && rpm2cpio "../${setup_rpm}" | cpio -idmu --quiet ./etc/passwd ./etc/group)
+cp setup-base/etc/passwd iso-root/etc-passwd-base
+cp setup-base/etc/group iso-root/etc-group-base
+rm -rf setup-base
+
 # Create custom install files tarball
 cp -ar root.override/* root/ || true
 tar czf iso-root/custom-files.tar.gz root hooks.d
