@@ -144,10 +144,10 @@ if [ ${#setup_rpms[@]} -ne 1 ]; then
   exit 1
 fi
 setup_dir=$(mktemp -d)
+trap 'rm -rf "${setup_dir}"' EXIT
 rpm2cpio "${setup_rpms[0]}" | (cd "${setup_dir}" && cpio -idmu --quiet ./etc/passwd ./etc/group)
 cp "${setup_dir}/etc/passwd" iso-root/etc-passwd-base
 cp "${setup_dir}/etc/group" iso-root/etc-group-base
-rm -rf "${setup_dir}"
 
 # Create custom install files tarball
 cp -ar root.override/* root/ || true
