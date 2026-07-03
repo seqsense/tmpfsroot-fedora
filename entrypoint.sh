@@ -135,6 +135,20 @@ while read rpm; do
   cp ./downloads/${rpm}.*.rpm iso-root/Packages/${initial}/
 done <rpms.lock
 
+# Bake base passwd/group into the ISO
+shopt -s nullglob
+setup_rpms=(iso-root/Packages/s/setup-*.rpm)
+shopt -u nullglob
+if [ ${#setup_rpms[@]} -ne 1 ]; then
+  echo "expected exactly one setup package in iso-root/Packages, found ${#setup_rpms[@]}" >&2
+  exit 1
+fi
+setup_dir=$(mktemp -d)
+trap 'rm -rf "${setup_dir}"' EXIT
+rpm2cpio "${setup_rpms[0]}" | (cd "${setup_dir}" && cpio -idmu --quiet ./etc/passwd ./etc/group)
+cp "${setup_dir}/etc/passwd" iso-root/etc-passwd-base
+cp "${setup_dir}/etc/group" iso-root/etc-group-base
+
 # Create custom install files tarball
 cp -ar root.override/* root/ || true
 tar czf iso-root/custom-files.tar.gz root hooks.d
