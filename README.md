@@ -101,7 +101,7 @@ Directory           | Files                  | Note
 ### Generate installer ISO
 
 ```shell
-export DISK_DEVS=sda,sdb     # System has /dev/sda and /dev/sdb
+export DISK_DEVS=sda,sdb     # Disks usable by the installer; ones not present on the machine are skipped
 export MAIN_DISK=sda         # Install OS to /dev/sda
 export PARTSIZE_DOCKER=8192  # 8G
 export PARTSIZE_LOG=2048     # 2G
