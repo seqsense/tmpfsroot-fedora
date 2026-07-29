@@ -28,7 +28,7 @@ mkdir -p downloads
 download_opts="--skip-broken --downloaddir=downloads"
 if [ ${FEDORA_MAJOR} -ge 41 ]; then
   # Option for dnf5
-  download_opts="--best --destdir=downloads"
+  download_opts="--skip-unavailable --destdir=downloads"
 fi
 cat rpms.lock | xargs -n256 dnf download \
   ${download_opts} \
