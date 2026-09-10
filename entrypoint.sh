@@ -154,6 +154,12 @@ cp -ar root.override/* root/ || true
 tar czf iso-root/custom-files.tar.gz root hooks.d
 
 # Generate kickstart config
+btrfs_extra_fsoptions=
+if [ ${FEDORA_MAJOR} -ge 41 ]; then
+  # Kernel 6.11 or later warns that space cache v1 is deprecated
+  btrfs_extra_fsoptions=,space_cache=v2
+fi
+
 mkdir -p ks2
 cp ks/ks.*.cfg ks2/ || true
 (cd ks2 && touch ks.post.cfg ks.post-nochroot.cfg ks.pre.cfg ks.pre-install.cfg ks.root.cfg)
@@ -164,6 +170,7 @@ sed "
     s/@@PARTSIZE_LOG@@/${PARTSIZE_LOG}/g
     s/@@PARTSIZE_CACHE@@/${PARTSIZE_CACHE}/g
     s/@@PARTSIZE_OPT@@/${PARTSIZE_OPT}/g
+    s/@@BTRFS_EXTRA_FSOPTIONS@@/${btrfs_extra_fsoptions}/g
     /@@KS\.POST\.CFG@@/{
       s/^/# /
       n
