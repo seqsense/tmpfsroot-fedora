@@ -57,7 +57,7 @@ split_package_name() {
   # - pkg-name-1.2-9.fc36.8 -> pkg-name 1.2   9.fc36.8
   # - pkg-name-1.2.3-9.fc36 -> pkg-name 1.2.3 9.fc36
   # - pkg-name-1.2-9        -> pkg-name 1.2   9
-  echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z.-_]\+\)-\([0-9]\+\(\.fc[0-9]\+\(\.[0-9]\+\)\?\)\?\)/\1 \2 \3/p'
+  echo $1 | sed -n 's/\(\S\+\)-\([0-9a-zA-Z._+~^]\+\)-\([0-9]\+\(\.fc[0-9]\+\(\.[0-9]\+\)\?\)\?\)/\1 \2 \3/p'
 }
 warn_if_not_in_dnf_repo() {
   if grep "^No package $1.* available.$" download.err >/dev/null 2>/dev/null; then
